@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { getOAuthState } from "better-auth/api";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { MongoClient } from "mongodb";
+import { admin } from "better-auth/plugins";
 
 function requiredEnv(name: string) {
   const value = process.env[name];
@@ -31,6 +32,7 @@ export const auth = betterAuth({
       clientSecret: requiredEnv("GITHUB_CLIENT_SECRET"),
     },
   },
+  plugins:[admin()],
   user: {
     additionalFields: {
       role: {
