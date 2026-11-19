@@ -1,7 +1,8 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -15,6 +16,8 @@ import {
 import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
+import { createTuitionApplication } from "@/lib/api/tuition";
+import { useSession } from "@/lib/auth-client";
 import type { TuitionFormValues } from "@/lib/types/tuition";
 
 type DetailsResult = { tuition: TuitionFormValues | null; error: string };
@@ -25,6 +28,9 @@ export function TuitionDetailsView({
   detailsPromise: Promise<DetailsResult>;
 }) {
   const { tuition, error } = use(detailsPromise);
+  const router = useRouter();
+  const { data: session, isPending } = useSession();
+  const [isRequesting, setIsRequesting] = useState(false);
   const fee =
     tuition?.monthlyFee == null
       ? "Not specified"
@@ -45,6 +51,60 @@ export function TuitionDetailsView({
       return "";
     }
   })();
+
+  async function handleRequestTuition() {
+    if (isPending) return;
+    if (!session) {
+      const tuitionId = tuition?._id || tuition?.id || tuition?.tuitionId;
+      const callbackPath = tuitionId ? `/tuitions/${tuitionId}` : "/tuitions";
+      router.push(`/sign-in?callbackURL=${encodeURIComponent(callbackPath)}`);
+      return;
+    }
+    if (session.user.role !== "student") {
+      toast.add({
+        title: "Student account required",
+        description: "Sign in with a student account to request this tuition.",
+        type: "error",
+      });
+      return;
+    }
+
+    const tuitionId = tuition?._id || tuition?.id || tuition?.tuitionId;
+    if (!tuitionId) {
+      toast.add({
+        title: "Request unavailable",
+        description: "This tuition listing does not have a valid ID.",
+        type: "error",
+      });
+      return;
+    }
+
+    setIsRequesting(true);
+    try {
+      await createTuitionApplication({
+        tuitionId,
+        studentId: session.user.id,
+        studentName: session.user.name || "Student",
+        studentEmail: session.user.email,
+      });
+      toast.add({
+        title: "Request sent",
+        description: "The tutor will review your tuition request.",
+        type: "success",
+      });
+    } catch (requestError) {
+      toast.add({
+        title: "Could not send request",
+        description:
+          requestError instanceof Error
+            ? requestError.message
+            : "Please try again.",
+        type: "error",
+      });
+    } finally {
+      setIsRequesting(false);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-[#fbfaf7] text-[#19342c]">
@@ -184,15 +244,12 @@ export function TuitionDetailsView({
                 </p>
                 <Button
                   type="button"
-                  onClick={() =>
-                    toast.add({
-                      title: "Booking coming soon",
-                      description: "Tuition booking is not available yet.",
-                    })
-                  }
+                  onClick={() => void handleRequestTuition()}
+                  disabled={isPending || isRequesting}
                   className="mt-6 h-11 w-full rounded-xl bg-[#1d3b31] text-sm font-semibold text-white hover:bg-[#315b45]"
                 >
-                  Book this tuition <ArrowRight size={16} />
+                  {isRequesting ? "Sending request…" : "Request this tuition"}{" "}
+                  <ArrowRight size={16} />
                 </Button>
                 <div className="mt-5 border-t border-[#edf0e9] pt-4">
                   <p className="text-xs text-[#89928b]">Listing status</p>

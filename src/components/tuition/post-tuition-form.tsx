@@ -37,6 +37,10 @@ type Props = {
   isPublishing: boolean;
   publishError: string;
   onBannerUploadingChange: (uploading: boolean) => void;
+  formTitle?: string;
+  formDescription?: string;
+  submitLabel?: string;
+  backHref?: string;
 };
 
 const inputClass =
@@ -75,12 +79,16 @@ export function PostTuitionForm({
   isPublishing,
   publishError,
   onBannerUploadingChange,
+  formTitle = "Post a tuition",
+  formDescription = "Add the details students need to find a learning opportunity that fits.",
+  submitLabel = "Submit for review",
+  backHref = "/dashboard",
 }: Props) {
   return (
     <div className="mx-auto max-w-6xl space-y-7">
       <div>
         <Link
-          href="/dashboard"
+          href={backHref}
           className="inline-flex items-center gap-2 text-xs font-semibold text-[#849087] transition hover:text-[#456450]"
         >
           <ArrowLeft size={15} /> Back to dashboard
@@ -91,11 +99,10 @@ export function PostTuitionForm({
               Share your expertise
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-[-.04em] text-[#19342c] sm:text-4xl">
-              Post a tuition
+              {formTitle}
             </h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-[#77827b]">
-              Add the details students need to find a learning opportunity that
-              fits.
+              {formDescription}
             </p>
           </div>
           <div className="flex items-center gap-2 self-start rounded-full border border-[#e3e8dc] bg-white px-3 py-2 text-xs font-semibold text-[#61784d] sm:self-auto">
@@ -406,7 +413,7 @@ export function PostTuitionForm({
                 disabled={isPublishing || isUploading}
                 className="h-10 rounded-xl bg-[#1d3b31] px-4 text-xs font-semibold text-white hover:bg-[#315b45]"
               >
-                {isPublishing ? "Submitting…" : "Submit for review"}
+                {isPublishing ? "Saving…" : submitLabel}
               </Button>
             </div>
           </Card>

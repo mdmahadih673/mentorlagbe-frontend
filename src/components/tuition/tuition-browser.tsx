@@ -9,6 +9,8 @@ import {
   MapPin,
   Search,
   SlidersHorizontal,
+  ChevronLeft,
+  ChevronRight,
   X,
 } from "lucide-react";
 import { Navbar } from "@/components/layout/navbar";
@@ -27,6 +29,7 @@ const subjects = [
 ];
 const classLevels = ["Class 6–8", "Class 9–10", "HSC", "Admission"];
 type SortOrder = "newest" | "fee-low" | "fee-high";
+const PAGE_SIZE = 6;
 
 function FilterCheckbox({
   label,
@@ -74,6 +77,7 @@ export function TuitionBrowser({
   const [minFee, setMinFee] = useState("");
   const [maxFee, setMaxFee] = useState("");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [page, setPage] = useState(1);
 
   const locations = useMemo(
     () =>
@@ -150,6 +154,17 @@ export function TuitionBrowser({
     maxFee,
     sortOrder,
   ]);
+  const pageCount = Math.max(1, Math.ceil(visibleTuitions.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const pageTuitions = visibleTuitions.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+  const pageNumbers = Array.from(
+    new Set([1, currentPage - 1, currentPage, currentPage + 1, pageCount]),
+  )
+    .filter((number) => number >= 1 && number <= pageCount)
+    .sort((a, b) => a - b);
 
   function toggleFilter(
     value: string,
@@ -157,12 +172,14 @@ export function TuitionBrowser({
     update: (next: string[]) => void,
     checked: boolean,
   ) {
+    setPage(1);
     update(
       checked ? [...values, value] : values.filter((item) => item !== value),
     );
   }
 
   function resetFilters() {
+    setPage(1);
     setSearch("");
     setLocation("");
     setSelectedSubjects([]);
@@ -211,7 +228,10 @@ export function TuitionBrowser({
                 type="search"
                 aria-label="Search tuitions"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setPage(1);
+                }}
                 placeholder="Search by subject, title, or tutor"
                 className="h-11 border-0 bg-transparent shadow-none focus-visible:ring-0"
               />
@@ -222,7 +242,10 @@ export function TuitionBrowser({
               <select
                 aria-label="Filter by location"
                 value={location}
-                onChange={(event) => setLocation(event.target.value)}
+                onChange={(event) => {
+                  setLocation(event.target.value);
+                  setPage(1);
+                }}
                 className="h-11 min-w-0 flex-1 bg-transparent text-sm text-[#68766e] outline-none sm:w-40"
               >
                 <option value="">Any location</option>
@@ -320,7 +343,10 @@ export function TuitionBrowser({
                   type="number"
                   min="0"
                   value={minFee}
-                  onChange={(event) => setMinFee(event.target.value)}
+                  onChange={(event) => {
+                    setMinFee(event.target.value);
+                    setPage(1);
+                  }}
                   placeholder="৳ 0"
                   className="mt-1 h-8 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
                 />
@@ -333,7 +359,10 @@ export function TuitionBrowser({
                   type="number"
                   min="0"
                   value={maxFee}
-                  onChange={(event) => setMaxFee(event.target.value)}
+                  onChange={(event) => {
+                    setMaxFee(event.target.value);
+                    setPage(1);
+                  }}
                   placeholder="৳ 10,000"
                   className="mt-1 h-8 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
                 />
@@ -360,9 +389,10 @@ export function TuitionBrowser({
               <select
                 aria-label="Sort tuition listings"
                 value={sortOrder}
-                onChange={(event) =>
-                  setSortOrder(event.target.value as SortOrder)
-                }
+                onChange={(event) => {
+                  setSortOrder(event.target.value as SortOrder);
+                  setPage(1);
+                }}
                 className="h-10 bg-transparent font-semibold text-[#526159] outline-none"
               >
                 <option value="newest">Newest</option>
@@ -380,13 +410,13 @@ export function TuitionBrowser({
                 {error} Make sure the backend is running and refresh the page.
               </div>
             ) : visibleTuitions.length ? (
-              visibleTuitions.map((tuition, index) => (
+              pageTuitions.map((tuition, index) => (
                 <TuitionCard
                   key={
                     tuition._id ||
                     tuition.id ||
                     tuition.tuitionId ||
-                    `${tuition.teacherId}-${index}`
+                    `${tuition.teacherId}-${(currentPage - 1) * PAGE_SIZE + index}`
                   }
                   tuition={tuition}
                   index={index}
@@ -407,6 +437,53 @@ export function TuitionBrowser({
               </div>
             )}
           </div>
+          {!error && visibleTuitions.length > PAGE_SIZE && (
+            <nav
+              aria-label="Tuition listings pages"
+              className="mt-8 flex flex-wrap items-center justify-center gap-2"
+            >
+              <button
+                type="button"
+                aria-label="Previous page"
+                disabled={currentPage === 1}
+                onClick={() => setPage(currentPage - 1)}
+                className="flex size-10 items-center justify-center rounded-xl border border-[#e3e7df] bg-white text-[#526159] transition hover:bg-[#f3f5ef] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronLeft size={18} />
+              </button>
+              {pageNumbers.map((pageNumber, index) => (
+                <span key={pageNumber} className="contents">
+                  {index > 0 && pageNumber - pageNumbers[index - 1] > 1 && (
+                    <span className="px-1 text-sm text-[#89928b]">…</span>
+                  )}
+                  <button
+                    type="button"
+                    aria-label={`Go to page ${pageNumber}`}
+                    aria-current={
+                      currentPage === pageNumber ? "page" : undefined
+                    }
+                    onClick={() => setPage(pageNumber)}
+                    className={`flex size-10 items-center justify-center rounded-xl border text-sm font-medium transition ${
+                      currentPage === pageNumber
+                        ? "border-[#1d3b31] bg-[#1d3b31] text-white"
+                        : "border-[#e3e7df] bg-white text-[#526159] hover:bg-[#f3f5ef]"
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                </span>
+              ))}
+              <button
+                type="button"
+                aria-label="Next page"
+                disabled={currentPage === pageCount}
+                onClick={() => setPage(currentPage + 1)}
+                className="flex size-10 items-center justify-center rounded-xl border border-[#e3e7df] bg-white text-[#526159] transition hover:bg-[#f3f5ef] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </nav>
+          )}
         </div>
       </section>
     </main>

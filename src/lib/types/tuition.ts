@@ -38,5 +38,23 @@ export interface TuitionFormValues {
   approvalStatus?: string;
   isActive?: boolean;
   createdAt?: string;
+  updatedAt?: string;
   tutorName?: string;
+}
+
+export type TuitionApplicationStatus = "pending" | "accepted" | "rejected";
+
+export interface TuitionApplication {
+  _id: string;
+  teacherId: string;
+  tuitionId: string;
+  studentId?: string;
+  studentName?: string;
+  studentEmail?: string;
+  tuitionTitle?: string;
+  subject?: string;
+  message?: string;
+  preferredTime?: string;
+  status?: TuitionApplicationStatus;
+  createdAt?: string;
 }
