@@ -106,12 +106,3 @@ export function updateTuition(
 export function deleteTuition(id: string, teacherId: string) {
   return sendTuitionMutation(id, teacherId, "DELETE");
 }
-
-export async function getAllUsers(): Promise<{ role?: string }[]> {
-  const response = await fetch(`${API_BASE_URL}/users`, { cache: "no-store" });
-  const result = (await response.json().catch(() => null)) as unknown;
-  if (!response.ok || !Array.isArray(result)) {
-    throw new Error("Could not load platform users.");
-  }
-  return result as { role?: string }[];
-}

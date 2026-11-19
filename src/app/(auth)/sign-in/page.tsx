@@ -25,6 +25,7 @@ export default function SignInPage() {
         email: String(formData.get("email") ?? "").trim(),
         password: String(formData.get("password") ?? ""),
         rememberMe: formData.get("rememberMe") === "on",
+        callbackURL: "/dashboard",
       });
 
       if (error) {
@@ -35,7 +36,7 @@ export default function SignInPage() {
       }
 
       toast.add({ title: "Signed in", description: "Welcome back to MentorLagbe.", type: "success" });
-      router.replace("/");
+      router.replace("/dashboard");
       router.refresh();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Something went wrong. Please try again.";

@@ -13,11 +13,13 @@ import {
   XCircle,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
+import { getUserType } from "@/lib/user-role";
+import { getAllUsers } from "@/lib/api/users";
 import {
   getStudentApplications,
   getTutorApplications,
 } from "@/lib/api/Application";
-import { getAllTuitions, getAllUsers, getMyTuitions } from "@/lib/api/tuition";
+import { getAllTuitions, getMyTuitions } from "@/lib/api/tuition";
 import type { TuitionApplication } from "@/lib/types/tuition";
 
 type DashboardRole = "student" | "tutor" | "admin";
@@ -51,7 +53,7 @@ export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/sign-in?callbackURL=%2Fdashboard");
 
-  const role = (session.user.role as DashboardRole | undefined) || "student";
+  const role = getUserType(session.user) as DashboardRole;
   const name = session.user.name?.split(" ")[0] || "there";
   let eyebrow = "Student workspace";
   let description =

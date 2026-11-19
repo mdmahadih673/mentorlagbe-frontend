@@ -1,25 +1,44 @@
-import { headers } from "next/headers";
-import { auth } from "../auth";
+import type { AccountRole, AdminUser } from "@/lib/types/user";
+import { getUserType } from "@/lib/user-role";
 
 const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
 
-export const getUsers = async () => {
-    const users = await auth.api.listUsers({
-        query: {
-            searchValue: "some name", // The value to search for.
-            searchField: "name", // The field to search in, defaults to email. Can be `email` or `name`.
-            searchOperator: "contains", // The operator to use for the search. Can be `contains`, `starts_with` or `ends_with`.
-            limit: 100, // The number of users to return. Defaults to 100.
-            offset: 100, // The offset to start from.
-            sortBy: "name", // The field to sort by.
-            sortDirection: "desc", // The direction to sort by.
-            filterField: "email", // The field to filter by.
-            filterValue: "hello@example.com", // The value to filter by.
-            filterOperator: "eq", // The operator to use for the filter.
-        },
-        // This endpoint requires session cookies.
-        headers: await headers(),
-    });
-    return users
+type BackendUser = {
+  id?: string;
+  _id?: string;
+  name?: string;
+  email?: string;
+  role?: string;
+  userType?: string;
+  image?: string;
+  createdAt?: string;
+  emailVerified?: boolean;
+};
+
+function isAccountRole(role?: string): role is AccountRole {
+  return role === "student" || role === "tutor" || role === "admin";
 }
+
+export async function getUsers(): Promise<AdminUser[]> {
+  const response = await fetch(`${API_BASE_URL}/users`, { cache: "no-store" });
+  const result = (await response.json().catch(() => null)) as unknown;
+
+  if (!response.ok || !Array.isArray(result)) {
+    throw new Error("Could not load users.");
+  }
+
+  return (result as BackendUser[])
+    .filter((user) => user.id || user._id)
+    .map((user) => ({
+      id: user.id || String(user._id),
+      name: user.name?.trim() || "Unnamed user",
+      email: user.email || "No email",
+      role: isAccountRole(user.role) ? user.role : getUserType(user),
+      image: user.image,
+      createdAt: user.createdAt,
+      emailVerified: user.emailVerified === true,
+    }));
+}
+
+export const getAllUsers = getUsers;

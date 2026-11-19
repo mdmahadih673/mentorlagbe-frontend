@@ -6,6 +6,7 @@ import { PostTuitionForm } from "@/components/tuition/post-tuition-form";
 import { toast } from "@/components/ui/toast";
 import { useSession } from "@/lib/auth-client";
 import { createTuition } from "@/lib/api/tuition";
+import { getUserType } from "@/lib/user-role";
 import type { TuitionFormValues } from "@/lib/types/tuition";
 
 const initialValues: TuitionFormValues = {
@@ -49,7 +50,7 @@ export default function PostTuitionPage() {
       );
       return;
     }
-    if (session.user.role?.toLowerCase() !== "tutor") {
+    if (getUserType(session.user) !== "tutor") {
       setPublishError("শুধু tutor account থেকে tuition post করা যাবে।");
       return;
     }

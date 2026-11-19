@@ -35,10 +35,11 @@ export const auth = betterAuth({
   plugins:[admin()],
   user: {
     additionalFields: {
-      role: {
-        type: ["student", "tutor"],
+      userType: {
+        type: "string",
         required: false,
         defaultValue: "student",
+        input: true,
       },
     },
   },
@@ -46,12 +47,17 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
-          const oauthState = await getOAuthState<{ role?: unknown }>();
-          const selectedRole = oauthState?.role;
+          const oauthState = await getOAuthState<{ userType?: unknown }>();
+          const selectedRole = oauthState?.userType;
+          const submittedType = (user as typeof user & { userType?: unknown }).userType;
+          const userType =
+            selectedRole === "tutor" || selectedRole === "student"
+              ? selectedRole
+              : submittedType === "tutor"
+                ? "tutor"
+                : "student";
 
-          if (selectedRole === "student" || selectedRole === "tutor") {
-            return { data: { ...user, role: selectedRole } };
-          }
+          return { data: { ...user, userType } };
         },
       },
     },

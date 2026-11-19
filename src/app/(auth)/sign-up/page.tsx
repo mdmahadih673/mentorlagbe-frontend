@@ -94,7 +94,7 @@ export default function SignUpPage() {
         email: String(formData.get("email") ?? "").trim(),
         password: String(formData.get("password") ?? ""),
         image: profileImageUrl || undefined,
-        role,
+        userType: role,
       });
 
       if (error) {

@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { createTuitionApplication } from "@/lib/api/Application";
 import { useSession } from "@/lib/auth-client";
+import { getUserType } from "@/lib/user-role";
 import type { TuitionFormValues } from "@/lib/types/tuition";
 
 type DetailsResult = { tuition: TuitionFormValues | null; error: string };
@@ -60,7 +61,7 @@ export function TuitionDetailsView({
       router.push(`/sign-in?callbackURL=${encodeURIComponent(callbackPath)}`);
       return;
     }
-    if (session.user.role !== "student") {
+    if (getUserType(session.user) !== "student") {
       toast.add({
         title: "Student account required",
         description: "Sign in with a student account to request this tuition.",

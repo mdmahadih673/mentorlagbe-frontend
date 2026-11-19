@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { EditTuitionForm } from "@/components/dashboard/edit-tuition-form";
 import { auth } from "@/lib/auth";
+import { getUserType } from "@/lib/user-role";
 import { getTuitionById } from "@/lib/api/tuition";
 
 export const instant = false;
@@ -17,7 +18,7 @@ export default async function EditMyTuitionPage({
       `/sign-in?callbackURL=${encodeURIComponent("/dashboard/my-tuitions")}`,
     );
   }
-  if (session.user.role !== "tutor") redirect("/dashboard");
+  if (getUserType(session.user) !== "tutor") redirect("/dashboard");
 
   const { id } = await params;
   const tuition = await getTuitionById(id).catch(() => null);

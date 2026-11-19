@@ -1,9 +1,13 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { ArrowRight, BookOpenCheck } from "lucide-react";
 import { TuitionCard } from "@/components/sections/tuition-card";
 import { getAllTuitions } from "@/lib/api/tuition";
 
 export async function FeaturedTuitions() {
+  // The listing comes from a no-store API fetch, so render it per request instead of
+  // trying to prerender request-time data during the build.
+  await connection();
   const tuitions = await getAllTuitions().catch(() => []);
   const featured = tuitions
     .filter((tuition) => tuition.isActive !== false)

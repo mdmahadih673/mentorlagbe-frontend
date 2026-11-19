@@ -17,15 +17,15 @@ export function SocialAuthButtons({ role }: { role?: AuthRole }) {
   async function handleProviderClick(provider: SocialProvider) {
     setPendingProvider(provider);
     const roleCallback = role
-      ? `/auth/oauth-role?role=${encodeURIComponent(role)}`
-      : "/";
+      ? `/auth/oauth-role?userType=${encodeURIComponent(role)}`
+      : "/dashboard";
 
     try {
       const { error } = await signIn.social({
         provider,
         callbackURL: roleCallback,
         newUserCallbackURL: roleCallback,
-        ...(role ? { additionalData: { role } } : {}),
+        ...(role ? { additionalData: { userType: role } } : {}),
       });
 
       if (error) {
