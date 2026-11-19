@@ -88,7 +88,7 @@ export default function SignInPage() {
                 </button>
               </form>
 
-              <p className="mt-7 text-center text-sm text-[#77827b]">New to MentorLagbe? <Link href="/auth/sign-up" className="font-semibold text-[#456b4d] hover:underline">Create an account</Link></p>
+              <p className="mt-7 text-center text-sm text-[#77827b]">New to MentorLagbe? <Link href="sign-up" className="font-semibold text-[#456b4d] hover:underline">Create an account</Link></p>
               <p className="mt-10 flex items-center justify-center gap-2 text-xs text-[#8a958d]"><ShieldCheck size={15} /> Your learning journey is in safe hands</p>
             </div>
           </div>

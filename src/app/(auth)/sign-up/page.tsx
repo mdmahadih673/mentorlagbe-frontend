@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
-import { ArrowLeft, ArrowRight, BookOpenCheck, Eye, EyeOff, GraduationCap, Sparkles } from "lucide-react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import { ArrowLeft, ArrowRight, BookOpenCheck, Eye, EyeOff, GraduationCap, ImagePlus, LoaderCircle, Sparkles } from "lucide-react";
 
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { toast } from "@/components/ui/toast";
@@ -16,7 +16,45 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<AuthRole>("student");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState("");
+  const [imageError, setImageError] = useState("");
   const [formError, setFormError] = useState("");
+
+  async function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    setImageError("");
+    setProfileImageUrl("");
+    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+      setImageError("Choose a JPG, PNG, WEBP, or GIF image.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setImageError("The image must be smaller than 5 MB.");
+      return;
+    }
+
+    setIsUploadingImage(true);
+    const uploadData = new FormData();
+    uploadData.append("file", file);
+
+    try {
+      const response = await fetch("/api/upload/image", { method: "POST", body: uploadData });
+      const result = (await response.json()) as { url?: string; message?: string };
+      if (!response.ok || !result.url) {
+        throw new Error(result.message || "Image upload failed. Please try again.");
+      }
+      setProfileImageUrl(result.url);
+    } catch (error) {
+      setImageError(error instanceof Error ? error.message : "Image upload failed. Please try again.");
+    } finally {
+      setIsUploadingImage(false);
+      input.value = "";
+    }
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -29,6 +67,7 @@ export default function SignUpPage() {
         name: String(formData.get("name") ?? "").trim(),
         email: String(formData.get("email") ?? "").trim(),
         password: String(formData.get("password") ?? ""),
+        image: profileImageUrl || undefined,
         role,
       });
 
@@ -88,6 +127,26 @@ export default function SignUpPage() {
                   </div>
                 </fieldset>
 
+                <div>
+                  <p className="mb-2 text-sm font-semibold text-[#354a40]">Profile photo <span className="font-normal text-[#929c95]">(optional)</span></p>
+                  <div className="flex items-center gap-3 rounded-xl border border-dashed border-[#cfd9c8] bg-white p-3">
+                    {profileImageUrl ? (
+                      <span role="img" aria-label="Selected profile photo" className="size-12 shrink-0 rounded-full border border-[#e4e8df] bg-cover bg-center" style={{ backgroundImage: `url("${profileImageUrl}")` }} />
+                    ) : (
+                      <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#f1f5e7] text-[#69884b]">{isUploadingImage ? <LoaderCircle size={20} className="animate-spin" /> : <ImagePlus size={20} />}</span>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <label htmlFor="signup-profile-image" className="inline-flex h-9 cursor-pointer items-center justify-center rounded-lg border border-[#e0e5dc] px-3 text-xs font-semibold text-[#456450] transition hover:bg-[#f7f8f4]">
+                        {isUploadingImage ? "Uploading photo…" : profileImageUrl ? "Change photo" : "Choose a photo"}
+                      </label>
+                      <input id="signup-profile-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleImageChange} disabled={isUploadingImage} className="sr-only" />
+                      <p aria-live="polite" className={`mt-1 truncate text-xs ${imageError ? "text-red-700" : "text-[#929c95]"}`}>
+                        {imageError || (isUploadingImage ? "Uploading securely to ImgBB…" : profileImageUrl ? "Photo uploaded." : "JPG, PNG, WEBP, or GIF · up to 5 MB")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <label className="block text-sm font-semibold text-[#354a40]" htmlFor="signup-name">
                   Full name
                   <input id="signup-name" name="name" type="text" placeholder="Your name" autoComplete="name" required className="mt-2 h-11 w-full rounded-xl border border-[#e0e5dc] bg-white px-4 font-normal text-[#203b31] outline-none transition placeholder:text-[#a0aaa3] focus:border-[#91aa78] focus:ring-4 focus:ring-[#91aa78]/10" />
@@ -107,8 +166,8 @@ export default function SignUpPage() {
                 </label>
 
                 {formError && <p role="alert" className="text-sm text-red-700">{formError}</p>}
-                <button type="submit" disabled={isSubmitting} className="mt-1 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1d3b31] px-5 text-sm font-semibold text-white transition hover:bg-[#315b45] disabled:cursor-not-allowed disabled:opacity-60">
-                  {isSubmitting ? "Creating account…" : <>Create account <ArrowRight size={17} /></>}
+                <button type="submit" disabled={isSubmitting || isUploadingImage} className="mt-1 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1d3b31] px-5 text-sm font-semibold text-white transition hover:bg-[#315b45] disabled:cursor-not-allowed disabled:opacity-60">
+                  {isSubmitting ? "Creating account…" : isUploadingImage ? "Uploading photo…" : <>Create account <ArrowRight size={17} /></>}
                 </button>
               </form>
 

@@ -44,14 +44,14 @@ export function Navbar() {
             nativeButton={false}
             variant="ghost"
             className="hidden rounded-full px-4 text-[#284239] sm:inline-flex"
-            render={<Link href="/auth/sign-in" />}
+            render={<Link href="sign-in" />}
           >
             Sign in
           </Button>
           <Button
             nativeButton={false}
             className="h-10 rounded-full bg-[#1d3b31] px-4 text-white hover:bg-[#315b45] sm:px-5"
-            render={<Link href="/auth/sign-up" />}
+            render={<Link href="sign-up" />}
           >
             Get started <ArrowUpRight />
           </Button>
