@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { ArrowUpRight, BookOpenCheck, GraduationCap } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getStudentApplications } from "@/lib/api/Application";
-import { getUserType } from "@/lib/user-role";
+import { getAccountRole } from "@/lib/user-role";
 import type { TuitionApplicationStatus } from "@/lib/types/tuition";
 
 const statusStyles: Record<TuitionApplicationStatus, string> = {
@@ -20,7 +20,7 @@ export default async function MyApplicationsPage() {
       `/sign-in?callbackURL=${encodeURIComponent("/dashboard/my-applications")}`,
     );
   }
-  if (getUserType(session.user) !== "student") redirect("/dashboard");
+  if (getAccountRole(session.user) !== "student") redirect("/dashboard");
 
   const applications = await getStudentApplications(session.user.id).catch(
     () => null,

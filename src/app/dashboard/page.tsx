@@ -13,7 +13,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
-import { getUserType } from "@/lib/user-role";
+import { getAccountRole } from "@/lib/user-role";
 import { getAllUsers } from "@/lib/api/users";
 import {
   getStudentApplications,
@@ -53,7 +53,7 @@ export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/sign-in?callbackURL=%2Fdashboard");
 
-  const role = getUserType(session.user) as DashboardRole;
+  const role = getAccountRole(session.user) as DashboardRole;
   const name = session.user.name?.split(" ")[0] || "there";
   let eyebrow = "Student workspace";
   let description =

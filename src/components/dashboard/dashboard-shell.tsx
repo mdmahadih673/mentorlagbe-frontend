@@ -20,7 +20,7 @@ import {
 
 import { toast } from "@/components/ui/toast";
 import { signOut, useSession } from "@/lib/auth-client";
-import { getUserType } from "@/lib/user-role";
+import { getAccountRole } from "@/lib/user-role";
 import { cn } from "@/lib/utils";
 
 type DashboardRole = "student" | "tutor" | "admin";
@@ -84,7 +84,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const user = session?.user;
-  const role = (user ? getUserType(user) : "student") as DashboardRole;
+  const role = (user ? getAccountRole(user) : "student") as DashboardRole;
   const navigation = roleNavigation[role] || roleNavigation.student;
   const pageTitle =
     pathname === "/dashboard/profile"

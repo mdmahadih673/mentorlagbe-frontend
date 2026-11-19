@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { auth, setAppUserType } from "@/lib/auth";
+import { auth, setAppUserRole } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -10,18 +10,21 @@ export async function POST(request: NextRequest) {
   }
 
   const body = (await request.json().catch(() => null)) as {
-    userType?: unknown;
+    role?: unknown;
   } | null;
-  if (body?.userType !== "student" && body?.userType !== "tutor") {
+  if (body?.role !== "student" && body?.role !== "tutor") {
     return NextResponse.json(
-      { message: "Choose a valid account type." },
+      { message: "Choose a valid account role." },
       { status: 400 },
     );
   }
 
-  const updated = await setAppUserType(session.user.id, body.userType);
+  const updated = await setAppUserRole(session.user.id, body.role);
   if (!updated) {
-    return NextResponse.json({ message: "Could not update account type." }, { status: 404 });
+    return NextResponse.json(
+      { message: "Could not update account role." },
+      { status: 404 },
+    );
   }
 
   return NextResponse.json({ success: true });

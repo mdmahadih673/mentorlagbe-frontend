@@ -107,10 +107,10 @@ export default function SignUpPage() {
         return;
       }
 
-      const roleResponse = await fetch("/api/auth/account-type", {
+      const roleResponse = await fetch("/api/auth/account-role", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userType: role }),
+        body: JSON.stringify({ role }),
       });
       if (!roleResponse.ok) {
         throw new Error("Your account was created, but its account type could not be saved. Please sign in and contact support.");

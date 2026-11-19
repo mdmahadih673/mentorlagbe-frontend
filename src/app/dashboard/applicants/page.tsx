@@ -5,7 +5,7 @@ import { ArrowLeft, UsersRound } from "lucide-react";
 import { TutorRequestsTable } from "@/components/dashboard/tutor-requests-table";
 import { auth } from "@/lib/auth";
 import { getTutorApplications } from "@/lib/api/Application";
-import { getUserType } from "@/lib/user-role";
+import { getAccountRole } from "@/lib/user-role";
 
 export default async function ApplicantsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -16,7 +16,7 @@ export default async function ApplicantsPage() {
     );
   }
 
-  if (getUserType(session.user) !== "tutor") {
+  if (getAccountRole(session.user) !== "tutor") {
     return (
       <section className="rounded-3xl border border-[#e6e9e1] bg-white p-8 text-center">
         <UsersRound className="mx-auto text-[#78934c]" size={28} />

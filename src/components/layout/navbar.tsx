@@ -8,7 +8,7 @@ import { ArrowUpRight, BookOpenCheck, ChevronDown, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { signOut, useSession } from "@/lib/auth-client";
-import { getUserType } from "@/lib/user-role";
+import { getAccountRole } from "@/lib/user-role";
 import { cn } from "@/lib/utils";
 
 const navigation = [
@@ -117,7 +117,7 @@ export function Navbar() {
                       {user.name || "My account"}
                     </span>
                     <span className="block text-left text-[10px] capitalize text-[#87928b]">
-                      {getUserType(user)}
+                      {getAccountRole(user)}
                     </span>
                   </span>
                   <ChevronDown

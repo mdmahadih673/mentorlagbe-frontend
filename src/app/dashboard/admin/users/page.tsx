@@ -4,7 +4,7 @@ import { ShieldCheck, UserRound, UsersRound } from "lucide-react";
 import { AdminUsersTable } from "@/components/dashboard/admin-users-table";
 import { auth } from "@/lib/auth";
 import { getUsers } from "@/lib/api/users";
-import { getUserType } from "@/lib/user-role";
+import { getAccountRole } from "@/lib/user-role";
 
 export const instant = false;
 
@@ -17,7 +17,7 @@ export default async function AdminUsersPage() {
     );
   }
 
-  if (getUserType(session.user) !== "admin") {
+  if (getAccountRole(session.user) !== "admin") {
     redirect("/dashboard");
   }
 
@@ -37,8 +37,7 @@ export default async function AdminUsersPage() {
             User management
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-6 text-white/70">
-            Review account details and prepare role changes for students,
-            tutors, and admins.
+            Review account details and manage student, tutor, and admin access.
           </p>
         </div>
         <p className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-sm text-white/80">

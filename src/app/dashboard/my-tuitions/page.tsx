@@ -5,7 +5,7 @@ import { BookOpenCheck, Plus } from "lucide-react";
 import { MyTuitionPostsTable } from "@/components/dashboard/my-tuition-posts-table";
 import { auth } from "@/lib/auth";
 import { getMyTuitions } from "@/lib/api/tuition";
-import { getUserType } from "@/lib/user-role";
+import { getAccountRole } from "@/lib/user-role";
 
 export default async function MyTuitionsPage({
   searchParams,
@@ -21,7 +21,7 @@ export default async function MyTuitionsPage({
     );
   }
 
-  if (getUserType(session.user) !== "tutor") {
+  if (getAccountRole(session.user) !== "tutor") {
     return (
       <section className="rounded-3xl border border-[#e6e9e1] bg-white p-8 text-center">
         <BookOpenCheck className="mx-auto text-[#78934c]" size={28} />

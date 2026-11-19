@@ -17,7 +17,7 @@ export function SocialAuthButtons({ role }: { role?: AuthRole }) {
   async function handleProviderClick(provider: SocialProvider) {
     setPendingProvider(provider);
     const roleCallback = role
-      ? `/auth/oauth-role?userType=${encodeURIComponent(role)}`
+      ? `/auth/oauth-role?role=${encodeURIComponent(role)}`
       : "/dashboard";
 
     try {

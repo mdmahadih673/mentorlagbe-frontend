@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { ApplicationStatusActions } from "@/components/dashboard/application-status-actions";
 import { auth } from "@/lib/auth";
-import { getUserType } from "@/lib/user-role";
+import { getAccountRole } from "@/lib/user-role";
 import { getTutorApplications } from "@/lib/api/Application";
 
 export const instant = false;
@@ -27,7 +27,7 @@ export default async function ApplicantDetailsPage({
       `/sign-in?callbackURL=${encodeURIComponent("/dashboard/applicants")}`,
     );
   }
-  if (getUserType(session.user) !== "tutor") redirect("/dashboard");
+  if (getAccountRole(session.user) !== "tutor") redirect("/dashboard");
 
   const { id } = await params;
   const applications = await getTutorApplications(session.user.id).catch(

@@ -6,6 +6,7 @@ import { Search, ShieldCheck, Trash2, UserRound, UsersRound } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
+import { deleteUserAccount, getUserRoleUpdate } from "@/lib/api/users";
 import type { AccountRole, AdminUser } from "@/lib/types/user";
 
 const roleOptions: AccountRole[] = ["student", "tutor", "admin"];
@@ -27,10 +28,10 @@ function formatDate(value?: string) {
   return Number.isNaN(date.getTime())
     ? "—"
     : new Intl.DateTimeFormat("en-BD", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      }).format(date);
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(date);
 }
 
 export function AdminUsersTable({
@@ -43,6 +44,7 @@ export function AdminUsersTable({
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [roleDrafts, setRoleDrafts] = useState<Record<string, AccountRole>>({});
+  const [updatingRoleUserId, setUpdatingRoleUserId] = useState<string | null>(null);
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
   const filteredUsers = useMemo(() => {
@@ -56,12 +58,34 @@ export function AdminUsersTable({
     );
   }, [query, users]);
 
-  function handleRoleChange(user: AdminUser) {
+  async function handleRoleChange(user: AdminUser) {
     const nextRole = roleDrafts[user.id] || user.role;
-    toast.add({
-      title: "Role update is not connected",
-      description: `Selected role: ${nextRole}. Add the update API here when it is ready.`,
-    });
+    if (nextRole === user.role || updatingRoleUserId !== null) return;
+
+    setUpdatingRoleUserId(user.id);
+    try {
+      await getUserRoleUpdate(user.id, nextRole);
+      setRoleDrafts((current) => {
+        const updated = { ...current };
+        delete updated[user.id];
+        return updated;
+      });
+      toast.add({
+        title: "Role updated",
+        description: `${user.name} is now a ${nextRole}.`,
+        type: "success",
+      });
+      router.refresh();
+    } catch (error) {
+      toast.add({
+        title: "Role update failed",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+        type: "error",
+      });
+    } finally {
+      setUpdatingRoleUserId(null);
+    }
   }
 
   async function handleDeleteUser(user: AdminUser) {
@@ -72,18 +96,7 @@ export function AdminUsersTable({
 
     setDeletingUserId(user.id);
     try {
-      const response = await fetch(
-        `/api/admin/users/${encodeURIComponent(user.id)}`,
-        { method: "DELETE" },
-      );
-      const result = (await response.json().catch(() => null)) as {
-        message?: string;
-      } | null;
-
-      if (!response.ok) {
-        throw new Error(result?.message || "Could not delete this user.");
-      }
-
+      await deleteUserAccount(user.id);
       toast.add({
         title: "User deleted",
         description: `${user.name}'s account was removed.`,
@@ -145,7 +158,7 @@ export function AdminUsersTable({
                 <th className="px-5 py-3.5 font-semibold">Joined</th>
                 <th className="px-5 py-3.5 font-semibold">Email status</th>
                 <th className="px-5 py-3.5 font-semibold">Role</th>
-            <th className="px-5 py-3.5 font-semibold">Actions</th>
+                <th className="px-5 py-3.5 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#edf0e9]">
@@ -223,11 +236,15 @@ export function AdminUsersTable({
                         <Button
                           type="button"
                           variant={hasRoleChange ? "default" : "outline"}
-                          disabled={!hasRoleChange}
-                          onClick={() => handleRoleChange(user)}
+                          disabled={!hasRoleChange || updatingRoleUserId !== null}
+                          onClick={() => void handleRoleChange(user)}
                           className={`h-9 rounded-lg px-3 text-xs font-semibold ${hasRoleChange ? "bg-[#1d3b31] text-white hover:bg-[#315b45]" : ""}`}
                         >
-                          {hasRoleChange ? "Apply role" : "No changes"}
+                          {updatingRoleUserId === user.id
+                            ? "Saving…"
+                            : hasRoleChange
+                              ? "Apply role"
+                              : "No changes"}
                         </Button>
                         <Button
                           type="button"

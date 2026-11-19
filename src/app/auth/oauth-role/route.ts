@@ -1,11 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { auth, setAppUserType } from "@/lib/auth";
+import { auth, setAppUserRole } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
-  const userType = request.nextUrl.searchParams.get("userType");
+  const role = request.nextUrl.searchParams.get("role");
   const dashboardUrl = new URL("/dashboard", request.url);
 
-  if (userType !== "student" && userType !== "tutor") {
+  if (role !== "student" && role !== "tutor") {
     return NextResponse.redirect(dashboardUrl);
   }
 
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const didUpdate = await setAppUserType(session.user.id, userType);
+  const didUpdate = await setAppUserRole(session.user.id, role);
   if (!didUpdate) {
     return NextResponse.redirect(dashboardUrl);
   }

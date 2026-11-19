@@ -31,27 +31,20 @@ export const auth = betterAuth({
       clientSecret: requiredEnv("GITHUB_CLIENT_SECRET"),
     },
   },
-  plugins:[admin()],
-  user: {
-    additionalFields: {
-      userType: {
-        type: "string",
-        required: false,
-        defaultValue: "student",
-        input: false,
-      },
-    },
-  },
+  plugins: [admin({ defaultRole: "student", adminRoles: ["admin"] })],
 });
 
-export async function setAppUserType(
+export async function setAppUserRole(
   userId: string,
-  userType: "student" | "tutor",
+  role: "student" | "tutor",
 ) {
   if (!ObjectId.isValid(userId)) return false;
   const id = new ObjectId(userId);
   const result = await db
     .collection("user")
-    .updateOne({ _id: id }, { $set: { userType } });
+    .updateOne(
+      { _id: id },
+      { $set: { role }, $unset: { userType: "" } },
+    );
   return result.matchedCount > 0;
 }
