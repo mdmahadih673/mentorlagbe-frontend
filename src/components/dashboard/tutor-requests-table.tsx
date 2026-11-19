@@ -2,13 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, Eye, LoaderCircle, Pencil, Trash2, X } from "lucide-react";
+import { Eye, LoaderCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
-import {
-  deleteTutorApplication,
-  updateTutorApplicationStatus,
-} from "@/lib/api/tuition";
+import { deleteTutorApplication } from "@/lib/api/Application";
 import type {
   TuitionApplication,
   TuitionApplicationStatus,
@@ -33,38 +30,7 @@ const statusClasses: Record<TuitionApplicationStatus, string> = {
 
 export function TutorRequestsTable({ applications, teacherId }: Props) {
   const [rows, setRows] = useState(applications);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [draftStatus, setDraftStatus] =
-    useState<TuitionApplicationStatus>("pending");
   const [busyId, setBusyId] = useState<string | null>(null);
-
-  function startEditing(application: TuitionApplication) {
-    setEditingId(application._id);
-    setDraftStatus(application.status || "pending");
-  }
-
-  async function saveStatus(applicationId: string) {
-    setBusyId(applicationId);
-    try {
-      await updateTutorApplicationStatus(applicationId, teacherId, draftStatus);
-      setRows((current) =>
-        current.map((row) =>
-          row._id === applicationId ? { ...row, status: draftStatus } : row,
-        ),
-      );
-      setEditingId(null);
-      toast.add({ title: "Request status updated", type: "success" });
-    } catch (error) {
-      toast.add({
-        title: "Could not update request",
-        description:
-          error instanceof Error ? error.message : "Please try again.",
-        type: "error",
-      });
-    } finally {
-      setBusyId(null);
-    }
-  }
 
   async function removeRequest(applicationId: string) {
     if (!window.confirm("Delete this student request?")) return;
@@ -162,77 +128,20 @@ export function TutorRequestsTable({ applications, teacherId }: Props) {
                     {submittedAt}
                   </td>
                   <td className="px-5 py-4">
-                    {editingId === application._id ? (
-                      <select
-                        aria-label={`Set request status for ${application.studentName || "student"}`}
-                        value={draftStatus}
-                        onChange={(event) =>
-                          setDraftStatus(
-                            event.target.value as TuitionApplicationStatus,
-                          )
-                        }
-                        className="h-9 rounded-lg border border-[#dfe5dc] bg-white px-2 text-xs font-semibold text-[#354a40] outline-none focus:border-[#91aa78]"
-                      >
-                        <option value="pending">Pending</option>
-                        <option value="accepted">Accept</option>
-                        <option value="rejected">Reject</option>
-                      </select>
-                    ) : (
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusClasses[status]}`}
-                      >
-                        {statusLabels[status]}
-                      </span>
-                    )}
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusClasses[status]}`}
+                    >
+                      {statusLabels[status]}
+                    </span>
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-1.5">
-                      {application.tuitionId && (
-                        <Link
-                          href={`/tuitions/${encodeURIComponent(application.tuitionId)}`}
-                          className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-[#dfe5dc] bg-white px-2.5 text-xs font-medium text-[#354a40] transition hover:bg-[#f7f8f4]"
-                        >
-                          <Eye size={14} /> Details
-                        </Link>
-                      )}
-                      {editingId === application._id ? (
-                        <>
-                          <Button
-                            type="button"
-                            size="icon-sm"
-                            aria-label="Save status"
-                            disabled={isBusy}
-                            onClick={() => void saveStatus(application._id)}
-                          >
-                            {isBusy ? (
-                              <LoaderCircle className="animate-spin" />
-                            ) : (
-                              <Check />
-                            )}
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon-sm"
-                            aria-label="Cancel editing status"
-                            disabled={isBusy}
-                            onClick={() => setEditingId(null)}
-                          >
-                            <X />
-                          </Button>
-                        </>
-                      ) : (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-8 gap-1.5 px-2.5 text-xs"
-                          disabled={isBusy}
-                          onClick={() => startEditing(application)}
-                        >
-                          <Pencil size={14} /> Edit
-                        </Button>
-                      )}
+                      <Link
+                        href={`/dashboard/applicants/${encodeURIComponent(application._id)}`}
+                        className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-[#dfe5dc] bg-white px-2.5 text-xs font-medium text-[#354a40] transition hover:bg-[#f7f8f4]"
+                      >
+                        <Eye size={14} /> Details
+                      </Link>
                       <Button
                         type="button"
                         variant="outline"

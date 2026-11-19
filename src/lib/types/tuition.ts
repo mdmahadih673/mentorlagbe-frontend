@@ -52,6 +52,7 @@ export interface TuitionApplication {
   studentName?: string;
   studentEmail?: string;
   tuitionTitle?: string;
+  tutorName?: string;
   subject?: string;
   message?: string;
   preferredTime?: string;

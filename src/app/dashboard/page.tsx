@@ -14,12 +14,10 @@ import {
 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import {
-  getAllTuitions,
-  getAllUsers,
-  getMyTuitions,
   getStudentApplications,
   getTutorApplications,
-} from "@/lib/api/tuition";
+} from "@/lib/api/Application";
+import { getAllTuitions, getAllUsers, getMyTuitions } from "@/lib/api/tuition";
 import type { TuitionApplication } from "@/lib/types/tuition";
 
 type DashboardRole = "student" | "tutor" | "admin";

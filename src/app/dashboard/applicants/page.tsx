@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { ArrowLeft, UsersRound } from "lucide-react";
 import { TutorRequestsTable } from "@/components/dashboard/tutor-requests-table";
 import { auth } from "@/lib/auth";
-import { getTutorApplications } from "@/lib/api/tuition";
+import { getTutorApplications } from "@/lib/api/Application";
 
 export default async function ApplicantsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
