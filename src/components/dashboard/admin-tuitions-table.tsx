@@ -1,10 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { ArrowUpRight, BookOpenCheck, Search } from "lucide-react";
+import { ArrowUpRight, BookOpenCheck, Search, Trash2 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/toast";
+import {
+  deleteAdminTuition,
+  updateAdminTuitionStatus,
+  type AdminTuitionStatus,
+} from "@/lib/api/tuition";
 import type { TuitionFormValues } from "@/lib/types/tuition";
 
 type ListingFilter = "all" | "pending" | "approved" | "rejected";
@@ -16,6 +24,8 @@ const filters: { label: string; value: ListingFilter }[] = [
   { label: "Rejected", value: "rejected" },
 ];
 
+const statusOptions: AdminTuitionStatus[] = ["pending", "approved", "rejected"];
+
 function getListingId(tuition: TuitionFormValues) {
   return tuition._id || tuition.id || tuition.tuitionId;
 }
@@ -23,6 +33,13 @@ function getListingId(tuition: TuitionFormValues) {
 function getListingStatus(tuition: TuitionFormValues) {
   if (tuition.isActive === false) return "inactive";
   return tuition.approvalStatus?.toLowerCase() || "unknown";
+}
+
+function getApprovalStatus(tuition: TuitionFormValues): AdminTuitionStatus {
+  const status = tuition.approvalStatus?.toLowerCase();
+  return statusOptions.includes(status as AdminTuitionStatus)
+    ? (status as AdminTuitionStatus)
+    : "pending";
 }
 
 function statusStyle(status: string) {
@@ -51,8 +68,74 @@ export function AdminTuitionsTable({
 }: {
   tuitions: TuitionFormValues[];
 }) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<ListingFilter>("all");
+  const [statusDrafts, setStatusDrafts] = useState<
+    Record<string, AdminTuitionStatus>
+  >({});
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  async function handleStatusUpdate(
+    tuition: TuitionFormValues,
+    id: string,
+  ) {
+    const status = statusDrafts[id] || getApprovalStatus(tuition);
+    if (status === getApprovalStatus(tuition) || updatingId || deletingId) return;
+
+    setUpdatingId(id);
+    try {
+      await updateAdminTuitionStatus(id, status);
+      setStatusDrafts((current) => {
+        const next = { ...current };
+        delete next[id];
+        return next;
+      });
+      toast.add({
+        title: "Status updated",
+        description: `Tuition listing is now ${status}.`,
+        type: "success",
+      });
+      router.refresh();
+    } catch (error) {
+      toast.add({
+        title: "Status update failed",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+        type: "error",
+      });
+    } finally {
+      setUpdatingId(null);
+    }
+  }
+
+  async function handleDelete(tuition: TuitionFormValues, id: string) {
+    const title = tuition.title || "this tuition listing";
+    if (!window.confirm(`Delete ${title} and its applications? This cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingId(id);
+    try {
+      await deleteAdminTuition(id);
+      toast.add({
+        title: "Tuition deleted",
+        description: `${title} was removed.`,
+        type: "success",
+      });
+      router.refresh();
+    } catch (error) {
+      toast.add({
+        title: "Delete failed",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+        type: "error",
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   const filteredTuitions = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -131,7 +214,7 @@ export function AdminTuitionsTable({
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[900px] border-collapse text-left">
+          <table className="w-full min-w-[1040px] border-collapse text-left">
             <thead className="bg-[#f7f8f4] text-[11px] uppercase tracking-[.12em] text-[#78847c]">
               <tr>
                 <th className="px-5 py-3.5 font-semibold sm:px-6">Tuition</th>
@@ -140,13 +223,18 @@ export function AdminTuitionsTable({
                 <th className="px-5 py-3.5 font-semibold">Monthly fee</th>
                 <th className="px-5 py-3.5 font-semibold">Posted</th>
                 <th className="px-5 py-3.5 font-semibold">Status</th>
-                <th className="px-5 py-3.5 font-semibold">Details</th>
+                <th className="px-5 py-3.5 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#edf0e9]">
               {filteredTuitions.map((tuition, index) => {
                 const id = getListingId(tuition);
                 const status = getListingStatus(tuition);
+                const approvalStatus = getApprovalStatus(tuition);
+                const selectedStatus = id
+                  ? statusDrafts[id] || approvalStatus
+                  : approvalStatus;
+                const hasStatusChange = selectedStatus !== approvalStatus;
 
                 return (
                   <tr
@@ -190,23 +278,59 @@ export function AdminTuitionsTable({
                       {formatDate(tuition.createdAt)}
                     </td>
                     <td className="px-5 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${statusStyle(status)}`}
-                      >
-                        {status}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <select
+                          aria-label={`Listing status for ${tuition.title || "tuition"}`}
+                          value={selectedStatus}
+                          disabled={!id || updatingId !== null || deletingId !== null}
+                          onChange={(event) =>
+                            id &&
+                            setStatusDrafts((current) => ({
+                              ...current,
+                              [id]: event.target.value as AdminTuitionStatus,
+                            }))
+                          }
+                          className={`h-9 rounded-lg border border-[#dfe5dc] px-2.5 text-xs font-semibold capitalize outline-none focus:border-[#91aa78] focus:ring-2 focus:ring-[#91aa78]/15 ${statusStyle(status)}`}
+                        >
+                          {statusOptions.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                        <Button
+                          type="button"
+                          size="sm"
+                          disabled={!id || !hasStatusChange || updatingId !== null || deletingId !== null}
+                          onClick={() => id && void handleStatusUpdate(tuition, id)}
+                          className="h-9 rounded-lg bg-[#1d3b31] px-3 text-xs text-white hover:bg-[#315b45]"
+                        >
+                          {updatingId === id ? "Saving…" : "Save"}
+                        </Button>
+                      </div>
                     </td>
                     <td className="px-5 py-4">
-                      {id ? (
-                        <Link
-                          href={`/tuitions/${encodeURIComponent(id)}`}
-                          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#dfe5dc] px-3 text-xs font-semibold text-[#354a40] transition hover:bg-[#f5f7f1]"
+                      <div className="flex items-center gap-2">
+                        {id ? (
+                          <Link
+                            href={`/tuitions/${encodeURIComponent(id)}`}
+                            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#dfe5dc] px-3 text-xs font-semibold text-[#354a40] transition hover:bg-[#f5f7f1]"
+                          >
+                            Details <ArrowUpRight size={14} />
+                          </Link>
+                        ) : null}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={!id || updatingId !== null || deletingId !== null}
+                          onClick={() => id && void handleDelete(tuition, id)}
+                          className="h-9 gap-1.5 rounded-lg border-red-200 px-3 text-xs text-red-700 hover:bg-red-50 hover:text-red-800"
                         >
-                          Details <ArrowUpRight size={14} />
-                        </Link>
-                      ) : (
-                        <span className="text-xs text-[#89928b]">Unavailable</span>
-                      )}
+                          <Trash2 size={14} />
+                          {deletingId === id ? "Deleting…" : "Delete"}
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 );
