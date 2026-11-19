@@ -171,7 +171,7 @@ export default function SignUpPage() {
                 </button>
               </form>
 
-              <p className="mt-6 text-center text-sm text-[#77827b]">Already have an account? <Link href="/auth/sign-in" className="font-semibold text-[#456b4d] hover:underline">Sign in</Link></p>
+              <p className="mt-6 text-center text-sm text-[#77827b]">Already have an account? <Link href="/sign-in" className="font-semibold text-[#456b4d] hover:underline">Sign in</Link></p>
               <p className="mt-4 text-center text-xs leading-5 text-[#929c95]">By joining, you agree to our <span className="font-medium text-[#63776a]">Terms of Service</span> and <span className="font-medium text-[#63776a]">Privacy Policy</span>.</p>
             </div>
           </div>

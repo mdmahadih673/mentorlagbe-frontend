@@ -34,7 +34,7 @@ export function Hero() {
               nativeButton={false}
               variant="outline"
               className="h-12 rounded-full border-[#d8ded4] bg-white px-6 text-[#284239] hover:bg-[#f5f7ef]"
-              render={<Link href="/auth/sign-up" />}
+              render={<Link href="/sign-up" />}
             >
               Become a tutor
             </Button>

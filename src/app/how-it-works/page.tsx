@@ -20,7 +20,7 @@ export default function HowItWorksPage() {
             <p className="mt-6 max-w-2xl text-base leading-7 text-[#69756d] sm:text-lg sm:leading-8">MentorLagbe helps students find a tutor who fits, and gives tutors a simple way to share opportunities and meet motivated learners.</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/tuitions" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#1d3b31] px-6 text-sm font-semibold text-white transition hover:bg-[#315b45]">Browse tuitions <ArrowRight size={17} /></Link>
-              <Link href="/auth/sign-up" className="inline-flex h-12 items-center justify-center rounded-full border border-[#d8ded4] bg-white px-6 text-sm font-semibold text-[#284239] transition hover:bg-[#f5f7ef]">Join as a tutor</Link>
+              <Link href="/sign-up" className="inline-flex h-12 items-center justify-center rounded-full border border-[#d8ded4] bg-white px-6 text-sm font-semibold text-[#284239] transition hover:bg-[#f5f7ef]">Join as a tutor</Link>
             </div>
           </div>
         </div>
