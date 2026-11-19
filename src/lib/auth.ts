@@ -1,7 +1,6 @@
 import { betterAuth } from "better-auth";
-import { getOAuthState } from "better-auth/api";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import { admin } from "better-auth/plugins";
 
 function requiredEnv(name: string) {
@@ -39,27 +38,20 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         defaultValue: "student",
-        input: true,
-      },
-    },
-  },
-  databaseHooks: {
-    user: {
-      create: {
-        before: async (user) => {
-          const oauthState = await getOAuthState<{ userType?: unknown }>();
-          const selectedRole = oauthState?.userType;
-          const submittedType = (user as typeof user & { userType?: unknown }).userType;
-          const userType =
-            selectedRole === "tutor" || selectedRole === "student"
-              ? selectedRole
-              : submittedType === "tutor"
-                ? "tutor"
-                : "student";
-
-          return { data: { ...user, userType } };
-        },
+        input: false,
       },
     },
   },
 });
+
+export async function setAppUserType(
+  userId: string,
+  userType: "student" | "tutor",
+) {
+  if (!ObjectId.isValid(userId)) return false;
+  const id = new ObjectId(userId);
+  const result = await db
+    .collection("user")
+    .updateOne({ _id: id }, { $set: { userType } });
+  return result.matchedCount > 0;
+}

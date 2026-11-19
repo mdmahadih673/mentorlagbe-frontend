@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth, setAppUserType } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   const userType = request.nextUrl.searchParams.get("userType");
@@ -19,12 +19,8 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const updateResult = await auth.api.updateUser({
-    headers: request.headers,
-    body: { userType },
-  });
-
-  if (!updateResult.status) {
+  const didUpdate = await setAppUserType(session.user.id, userType);
+  if (!didUpdate) {
     return NextResponse.redirect(dashboardUrl);
   }
 

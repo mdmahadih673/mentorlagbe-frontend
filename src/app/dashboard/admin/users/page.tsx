@@ -6,6 +6,8 @@ import { auth } from "@/lib/auth";
 import { getUsers } from "@/lib/api/users";
 import { getUserType } from "@/lib/user-role";
 
+export const instant = false;
+
 export default async function AdminUsersPage() {
   const session = await auth.api.getSession({ headers: await headers() });
 
@@ -76,7 +78,7 @@ export default async function AdminUsersPage() {
           this page.
         </div>
       ) : (
-        <AdminUsersTable users={users} />
+        <AdminUsersTable users={users} currentUserId={session.user.id} />
       )}
     </div>
   );

@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, ShieldCheck, UserRound, UsersRound } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, ShieldCheck, Trash2, UserRound, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
@@ -32,9 +33,17 @@ function formatDate(value?: string) {
       }).format(date);
 }
 
-export function AdminUsersTable({ users }: { users: AdminUser[] }) {
+export function AdminUsersTable({
+  users,
+  currentUserId,
+}: {
+  users: AdminUser[];
+  currentUserId: string;
+}) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [roleDrafts, setRoleDrafts] = useState<Record<string, AccountRole>>({});
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
   const filteredUsers = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -53,6 +62,44 @@ export function AdminUsersTable({ users }: { users: AdminUser[] }) {
       title: "Role update is not connected",
       description: `Selected role: ${nextRole}. Add the update API here when it is ready.`,
     });
+  }
+
+  async function handleDeleteUser(user: AdminUser) {
+    if (user.id === currentUserId) return;
+    if (!window.confirm(`Delete ${user.name}'s account? This cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingUserId(user.id);
+    try {
+      const response = await fetch(
+        `/api/admin/users/${encodeURIComponent(user.id)}`,
+        { method: "DELETE" },
+      );
+      const result = (await response.json().catch(() => null)) as {
+        message?: string;
+      } | null;
+
+      if (!response.ok) {
+        throw new Error(result?.message || "Could not delete this user.");
+      }
+
+      toast.add({
+        title: "User deleted",
+        description: `${user.name}'s account was removed.`,
+        type: "success",
+      });
+      router.refresh();
+    } catch (error) {
+      toast.add({
+        title: "Delete failed",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+        type: "error",
+      });
+    } finally {
+      setDeletingUserId(null);
+    }
   }
 
   return (
@@ -98,7 +145,7 @@ export function AdminUsersTable({ users }: { users: AdminUser[] }) {
                 <th className="px-5 py-3.5 font-semibold">Joined</th>
                 <th className="px-5 py-3.5 font-semibold">Email status</th>
                 <th className="px-5 py-3.5 font-semibold">Role</th>
-                <th className="px-5 py-3.5 font-semibold">Action</th>
+            <th className="px-5 py-3.5 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#edf0e9]">
@@ -172,15 +219,36 @@ export function AdminUsersTable({ users }: { users: AdminUser[] }) {
                       </select>
                     </td>
                     <td className="px-5 py-4">
-                      <Button
-                        type="button"
-                        variant={hasRoleChange ? "default" : "outline"}
-                        disabled={!hasRoleChange}
-                        onClick={() => handleRoleChange(user)}
-                        className={`h-9 rounded-lg px-3 text-xs font-semibold ${hasRoleChange ? "bg-[#1d3b31] text-white hover:bg-[#315b45]" : ""}`}
-                      >
-                        {hasRoleChange ? "Apply role" : "No changes"}
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          variant={hasRoleChange ? "default" : "outline"}
+                          disabled={!hasRoleChange}
+                          onClick={() => handleRoleChange(user)}
+                          className={`h-9 rounded-lg px-3 text-xs font-semibold ${hasRoleChange ? "bg-[#1d3b31] text-white hover:bg-[#315b45]" : ""}`}
+                        >
+                          {hasRoleChange ? "Apply role" : "No changes"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          aria-label={`Delete ${user.name}`}
+                          title={
+                            user.id === currentUserId
+                              ? "You cannot delete your own account here"
+                              : "Delete user"
+                          }
+                          disabled={
+                            user.id === currentUserId ||
+                            deletingUserId !== null
+                          }
+                          onClick={() => void handleDeleteUser(user)}
+                          className="h-9 gap-1.5 rounded-lg border-red-200 px-3 text-xs font-semibold text-red-700 hover:bg-red-50 hover:text-red-800"
+                        >
+                          <Trash2 size={14} />
+                          {deletingUserId === user.id ? "Deleting…" : "Delete"}
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 );

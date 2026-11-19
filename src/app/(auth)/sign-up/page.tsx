@@ -94,7 +94,6 @@ export default function SignUpPage() {
         email: String(formData.get("email") ?? "").trim(),
         password: String(formData.get("password") ?? ""),
         image: profileImageUrl || undefined,
-        userType: role,
       });
 
       if (error) {
@@ -106,6 +105,15 @@ export default function SignUpPage() {
           type: "error",
         });
         return;
+      }
+
+      const roleResponse = await fetch("/api/auth/account-type", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userType: role }),
+      });
+      if (!roleResponse.ok) {
+        throw new Error("Your account was created, but its account type could not be saved. Please sign in and contact support.");
       }
 
       toast.add({

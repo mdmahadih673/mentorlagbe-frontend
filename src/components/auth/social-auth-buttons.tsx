@@ -25,7 +25,6 @@ export function SocialAuthButtons({ role }: { role?: AuthRole }) {
         provider,
         callbackURL: roleCallback,
         newUserCallbackURL: roleCallback,
-        ...(role ? { additionalData: { userType: role } } : {}),
       });
 
       if (error) {
