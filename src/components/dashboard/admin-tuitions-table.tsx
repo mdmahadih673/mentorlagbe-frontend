@@ -1,0 +1,220 @@
+"use client";
+
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { ArrowUpRight, BookOpenCheck, Search } from "lucide-react";
+
+import { Input } from "@/components/ui/input";
+import type { TuitionFormValues } from "@/lib/types/tuition";
+
+type ListingFilter = "all" | "pending" | "approved" | "rejected";
+
+const filters: { label: string; value: ListingFilter }[] = [
+  { label: "All listings", value: "all" },
+  { label: "Pending", value: "pending" },
+  { label: "Approved", value: "approved" },
+  { label: "Rejected", value: "rejected" },
+];
+
+function getListingId(tuition: TuitionFormValues) {
+  return tuition._id || tuition.id || tuition.tuitionId;
+}
+
+function getListingStatus(tuition: TuitionFormValues) {
+  if (tuition.isActive === false) return "inactive";
+  return tuition.approvalStatus?.toLowerCase() || "unknown";
+}
+
+function statusStyle(status: string) {
+  if (status === "approved") return "bg-emerald-50 text-emerald-800";
+  if (status === "rejected" || status === "inactive") {
+    return "bg-red-50 text-red-800";
+  }
+  if (status === "pending") return "bg-amber-50 text-amber-900";
+  return "bg-[#f3f4f1] text-[#77827b]";
+}
+
+function formatDate(value?: string) {
+  if (!value) return "—";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? "—"
+    : new Intl.DateTimeFormat("en-BD", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }).format(date);
+}
+
+export function AdminTuitionsTable({
+  tuitions,
+}: {
+  tuitions: TuitionFormValues[];
+}) {
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<ListingFilter>("all");
+
+  const filteredTuitions = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    return tuitions.filter((tuition) => {
+      const matchesStatus =
+        statusFilter === "all" || getListingStatus(tuition) === statusFilter;
+      const searchable = [
+        tuition.title,
+        tuition.subject,
+        tuition.classLevel,
+        tuition.tutorName,
+        tuition.teacherId,
+        tuition.location,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return matchesStatus && searchable.includes(normalizedQuery);
+    });
+  }, [query, statusFilter, tuitions]);
+
+  return (
+    <section className="overflow-hidden rounded-3xl border border-[#e6e9e1] bg-white">
+      <div className="flex flex-col justify-between gap-4 border-b border-[#edf0e9] p-5 sm:flex-row sm:items-center sm:px-6">
+        <div>
+          <h2 className="font-semibold text-[#203b31]">All tuition posts</h2>
+          <p className="mt-1 text-xs text-[#89928b]">
+            Showing {filteredTuitions.length} of {tuitions.length} listings
+          </p>
+        </div>
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+          <label className="flex h-10 w-full items-center gap-2 rounded-xl border border-[#e1e6de] bg-[#fdfdfb] px-3 sm:w-64">
+            <Search size={16} className="shrink-0 text-[#91a087]" />
+            <Input
+              type="search"
+              aria-label="Search tuition posts"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search title, tutor, subject"
+              className="h-8 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
+            />
+          </label>
+          <label className="sr-only" htmlFor="tuition-status-filter">
+            Filter by listing status
+          </label>
+          <select
+            id="tuition-status-filter"
+            value={statusFilter}
+            onChange={(event) =>
+              setStatusFilter(event.target.value as ListingFilter)
+            }
+            className="h-10 rounded-xl border border-[#e1e6de] bg-white px-3 text-sm text-[#526159] outline-none focus:border-[#91aa78] focus:ring-2 focus:ring-[#91aa78]/15"
+          >
+            {filters.map((filter) => (
+              <option key={filter.value} value={filter.value}>
+                {filter.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {filteredTuitions.length === 0 ? (
+        <div className="px-6 py-14 text-center">
+          <BookOpenCheck className="mx-auto text-[#9aaa8c]" size={28} />
+          <h3 className="mt-3 font-semibold text-[#354a40]">
+            {tuitions.length ? "No listings match your filters" : "No tuition posts yet"}
+          </h3>
+          <p className="mt-1 text-sm text-[#89928b]">
+            {tuitions.length
+              ? "Try another search term or status."
+              : "New tuition posts will appear here."}
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[900px] border-collapse text-left">
+            <thead className="bg-[#f7f8f4] text-[11px] uppercase tracking-[.12em] text-[#78847c]">
+              <tr>
+                <th className="px-5 py-3.5 font-semibold sm:px-6">Tuition</th>
+                <th className="px-5 py-3.5 font-semibold">Tutor</th>
+                <th className="px-5 py-3.5 font-semibold">Mode</th>
+                <th className="px-5 py-3.5 font-semibold">Monthly fee</th>
+                <th className="px-5 py-3.5 font-semibold">Posted</th>
+                <th className="px-5 py-3.5 font-semibold">Status</th>
+                <th className="px-5 py-3.5 font-semibold">Details</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#edf0e9]">
+              {filteredTuitions.map((tuition, index) => {
+                const id = getListingId(tuition);
+                const status = getListingStatus(tuition);
+
+                return (
+                  <tr
+                    key={id || `${tuition.title}-${index}`}
+                    className="text-sm text-[#526159]"
+                  >
+                    <td className="px-5 py-4 sm:px-6">
+                      <p className="font-semibold text-[#203b31]">
+                        {tuition.title || "Untitled tuition"}
+                      </p>
+                      <p className="mt-1 text-xs text-[#89928b]">
+                        {[tuition.subject, tuition.classLevel]
+                          .filter(Boolean)
+                          .join(" · ") || "Subject not set"}
+                      </p>
+                    </td>
+                    <td className="px-5 py-4">
+                      <p className="font-medium text-[#354a40]">
+                        {tuition.tutorName || "Tutor"}
+                      </p>
+                      <p className="mt-1 text-xs text-[#89928b]">
+                        ID: {tuition.teacherId || "—"}
+                      </p>
+                    </td>
+                    <td className="px-5 py-4 text-xs">
+                      <p className="font-medium text-[#354a40]">
+                        {tuition.mode}
+                      </p>
+                      <p className="mt-1 text-[#89928b]">
+                        {tuition.mode === "Online"
+                          ? "Online"
+                          : tuition.location || "Location not set"}
+                      </p>
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4 font-semibold text-[#354a40]">
+                      {tuition.monthlyFee === "" || tuition.monthlyFee == null
+                        ? "—"
+                        : `৳ ${new Intl.NumberFormat("en-BD").format(Number(tuition.monthlyFee))}`}
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4 text-xs text-[#68766e]">
+                      {formatDate(tuition.createdAt)}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${statusStyle(status)}`}
+                      >
+                        {status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      {id ? (
+                        <Link
+                          href={`/tuitions/${encodeURIComponent(id)}`}
+                          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#dfe5dc] px-3 text-xs font-semibold text-[#354a40] transition hover:bg-[#f5f7f1]"
+                        >
+                          Details <ArrowUpRight size={14} />
+                        </Link>
+                      ) : (
+                        <span className="text-xs text-[#89928b]">Unavailable</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
