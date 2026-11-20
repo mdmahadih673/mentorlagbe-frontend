@@ -7,6 +7,10 @@ export type StudentApplicationCounts = {
   pendingApplications: number;
   acceptedApplications: number;
   rejectedApplications: number;
+  activeApplications: number;
+  limit: number | null;
+  remaining: number | null;
+  canApply: boolean;
 };
 
 export async function getStudentApplicationCounts(
@@ -30,6 +34,10 @@ export async function getStudentApplicationCounts(
     pendingApplications: result.pendingApplications ?? 0,
     acceptedApplications: result.acceptedApplications ?? 0,
     rejectedApplications: result.rejectedApplications ?? 0,
+    activeApplications: result.activeApplications ?? 0,
+    limit: result.limit ?? null,
+    remaining: result.remaining ?? null,
+    canApply: result.canApply ?? false,
   };
 }
 

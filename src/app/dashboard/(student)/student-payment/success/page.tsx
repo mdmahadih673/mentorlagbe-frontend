@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, BadgeCheck, BookOpenCheck, CircleCheck, CircleHelp } from "lucide-react";
 
 import { auth, isStudentPro } from "@/lib/auth";
-import { verifyStudentCheckout } from "@/lib/api/payment-api/payments";
+import { verifyStudentCheckout } from "@/lib/api/payment-api/student-payment";
 import { getAccountRole } from "@/lib/user-role";
 
 export const instant = false;
@@ -18,13 +18,17 @@ export default async function StudentPaymentSuccessPage({ searchParams }: PagePr
 
   const { session_id: sessionId } = await searchParams;
   let paymentConfirmed = false;
+  let verificationError = "";
   if (sessionId) {
     try {
       await verifyStudentCheckout(sessionId, session.user.id);
       paymentConfirmed = true;
-    } catch {
+    } catch (error) {
       paymentConfirmed = false;
+      verificationError = error instanceof Error ? error.message : "Payment verification failed.";
     }
+  } else {
+    verificationError = "Stripe session ID is missing from this page URL.";
   }
 
   const isPro = paymentConfirmed || await isStudentPro(session.user.id).catch(() => false);
@@ -52,7 +56,9 @@ export default async function StudentPaymentSuccessPage({ searchParams }: PagePr
             <div>
               <h2 className="text-sm font-semibold text-[#203b31]">{isPro ? "Pro Student plan active" : "Your plan has not changed yet"}</h2>
               <p className="mt-1 text-sm leading-5 text-[#77827b]">
-                {isPro ? `Payment confirmation recorded${session.user.email ? ` for ${session.user.email}` : ""}.` : "Only a completed, verified Stripe payment can activate Pro."}
+                {isPro
+                  ? `Payment confirmation recorded${session.user.email ? ` for ${session.user.email}` : ""}.`
+                  : verificationError || "Only a completed, verified Stripe payment can activate Pro."}
               </p>
             </div>
           </div>
@@ -64,6 +70,14 @@ export default async function StudentPaymentSuccessPage({ searchParams }: PagePr
               <BookOpenCheck size={16} /> My applications
             </Link>
           </div>
+          {!isPro && sessionId && (
+            <Link
+              href={`/dashboard/student-payment/success?session_id=${encodeURIComponent(sessionId)}`}
+              className="mt-4 inline-flex text-sm font-semibold text-[#628044] underline"
+            >
+              Retry payment verification
+            </Link>
+          )}
         </div>
       </section>
     </main>

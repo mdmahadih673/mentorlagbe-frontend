@@ -16,22 +16,28 @@ import {
 import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
-import { createTuitionApplication } from "@/lib/api/student/applications";
+import {
+  createTuitionApplication,
+  getStudentApplicationCounts,
+} from "@/lib/api/student/applications";
 import { useSession } from "@/lib/auth-client";
 import { getAccountRole } from "@/lib/user-role";
-import type { TuitionFormValues } from "@/lib/types/tuition";
+import type { TuitionApplicationStatus, TuitionFormValues } from "@/lib/types/tuition";
 
 type DetailsResult = { tuition: TuitionFormValues | null; error: string };
 
 export function TuitionDetailsView({
   detailsPromise,
+  initialRequestStatus,
 }: {
   detailsPromise: Promise<DetailsResult>;
+  initialRequestStatus: Extract<TuitionApplicationStatus, "pending" | "accepted"> | null;
 }) {
   const { tuition, error } = use(detailsPromise);
   const router = useRouter();
   const { data: session, isPending } = useSession();
   const [isRequesting, setIsRequesting] = useState(false);
+  const [activeRequestStatus, setActiveRequestStatus] = useState(initialRequestStatus);
   const fee =
     tuition?.monthlyFee == null
       ? "Not specified"
@@ -82,12 +88,24 @@ export function TuitionDetailsView({
 
     setIsRequesting(true);
     try {
+      const counts = await getStudentApplicationCounts(session.user.id);
+      if (!counts.canApply) {
+        toast.add({
+          title: "Free request limit reached",
+          description: "Upgrade to Pro to send more tuition requests.",
+          type: "error",
+        });
+        router.push("/dashboard/student-payment");
+        return;
+      }
+
       await createTuitionApplication({
         tuitionId,
         studentId: session.user.id,
         studentName: session.user.name || "Student",
         studentEmail: session.user.email,
       });
+      setActiveRequestStatus("pending");
       toast.add({
         title: "Request sent",
         description: "The tutor will review your tuition request.",
@@ -246,11 +264,15 @@ export function TuitionDetailsView({
                 <Button
                   type="button"
                   onClick={() => void handleRequestTuition()}
-                  disabled={isPending || isRequesting}
-                  className="mt-6 h-11 w-full rounded-xl bg-[#1d3b31] text-sm font-semibold text-white hover:bg-[#315b45]"
+                  disabled={isPending || isRequesting || Boolean(activeRequestStatus)}
+                  className="mt-6 h-11 w-full rounded-xl bg-[#1d3b31] text-sm font-semibold text-white hover:bg-[#315b45] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isRequesting ? "Sending request…" : "Request this tuition"}{" "}
-                  <ArrowRight size={16} />
+                  {isRequesting
+                    ? "Sending request…"
+                    : activeRequestStatus
+                      ? `Request ${activeRequestStatus}`
+                      : "Request this tuition"}
+                  {!activeRequestStatus && <ArrowRight size={16} />}
                 </Button>
                 <div className="mt-5 border-t border-[#edf0e9] pt-4">
                   <p className="text-xs text-[#89928b]">Listing status</p>

@@ -15,7 +15,9 @@ import {
 import { auth } from "@/lib/auth";
 import { getAccountRole } from "@/lib/user-role";
 import { getAllUsers } from "@/lib/api/admin/users";
-import { getStudentApplications } from "@/lib/api/student/applications";
+import {
+  getStudentApplicationCounts,
+} from "@/lib/api/student/applications";
 import { getTutorApplications } from "@/lib/api/tutor/applications";
 import { getMyTuitions } from "@/lib/api/tutor/tuition";
 import { getAllTuitions } from "@/lib/api/tuition";
@@ -175,28 +177,28 @@ export default async function DashboardPage() {
       },
     ];
   } else {
-    const [applications, tuitions] = await Promise.all([
-      getStudentApplications(session.user.id).catch(() => null),
+    const [applicationCounts, tuitions] = await Promise.all([
+      getStudentApplicationCounts(session.user.id).catch(() => null),
       getAllTuitions().catch(() => null),
     ]);
     stats = [
       {
         label: "Applications",
-        value: count(applicationCount(applications)),
+        value: count(applicationCounts?.totalApplications),
         note: "Your tuition requests",
         icon: BookOpenCheck,
         tint: "bg-[#eaf0dc] text-[#648147]",
       },
       {
         label: "Accepted",
-        value: count(applicationCount(applications, "accepted")),
+        value: count(applicationCounts?.acceptedApplications),
         note: "Ready for next steps",
         icon: Check,
         tint: "bg-[#e8f3ed] text-[#4f8866]",
       },
       {
         label: "Pending",
-        value: count(applicationCount(applications, "pending")),
+        value: count(applicationCounts?.pendingApplications),
         note: "Waiting for a response",
         icon: Clock3,
         tint: "bg-[#fbf0dc] text-[#b0873b]",

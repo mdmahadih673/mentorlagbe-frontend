@@ -66,12 +66,12 @@ export function StudentPaymentPage({ isPro }: { isPro: boolean }) {
             </span>
           </div>
           <p className="mt-5 text-sm leading-6 text-[#77827b]">
-            Browse tuition listings and send applications to tutors.
+            Browse listings and keep up to 2 active tuition requests at a time.
           </p>
           <ul className="mt-6 space-y-3 text-sm text-[#526159]">
             <PlanFeature>Browse tuition listings</PlanFeature>
-            <PlanFeature>Apply to tuition posts</PlanFeature>
-            <PlanFeature>Track your applications</PlanFeature>
+            <PlanFeature>Up to 2 active requests</PlanFeature>
+            <PlanFeature>Track application status</PlanFeature>
           </ul>
           <div className="mt-auto border-t border-[#edf0e9] pt-5">
             <p className="text-sm font-semibold text-[#526159]">Your current plan</p>
@@ -100,8 +100,8 @@ export function StudentPaymentPage({ isPro }: { isPro: boolean }) {
             <span className="pb-1.5 text-sm text-white/60">one-time payment</span>
           </div>
           <ul className="relative mt-7 grid gap-3 text-sm text-white/85 sm:grid-cols-2">
-            <PlanFeature pro>Pro Student plan access</PlanFeature>
-            <PlanFeature pro>Track your applications</PlanFeature>
+            <PlanFeature pro>Priority booking</PlanFeature>
+            <PlanFeature pro>Unlimited active requests</PlanFeature>
             <PlanFeature pro>One-time payment</PlanFeature>
             <PlanFeature pro>Secure Stripe checkout</PlanFeature>
           </ul>

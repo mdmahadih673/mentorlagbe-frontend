@@ -1,8 +1,12 @@
 import { Suspense } from "react";
+import { headers } from "next/headers";
 import { Navbar } from "@/components/layout/navbar";
 import { TuitionDetailsView } from "@/components/tuition/tuition-details-view";
+import { auth } from "@/lib/auth";
+import { getStudentApplications } from "@/lib/api/student/applications";
 import { getTuitionById } from "@/lib/api/tuition";
-import type { TuitionFormValues } from "@/lib/types/tuition";
+import { getAccountRole } from "@/lib/user-role";
+import type { TuitionApplicationStatus, TuitionFormValues } from "@/lib/types/tuition";
 
 type DetailsResult = { tuition: TuitionFormValues | null; error: string };
 
@@ -43,5 +47,25 @@ export default function TuitionDetailsPage({params,}: {params: Promise<{ id: str
 
 async function TuitionDetailsFromParams({params,}: {params: Promise<{ id: string }>;}) {
   const { id } = await params;
-  return <TuitionDetailsView detailsPromise={loadTuition(id)} />;
+  const session = await auth.api.getSession({ headers: await headers() });
+  let initialRequestStatus: Extract<TuitionApplicationStatus, "pending" | "accepted"> | null = null;
+
+  if (session && getAccountRole(session.user) === "student") {
+    const applications = await getStudentApplications(session.user.id).catch(() => []);
+    const activeRequest = applications.find(
+      (application) =>
+        application.tuitionId === id &&
+        ["pending", "accepted"].includes(application.status?.toLowerCase() || ""),
+    );
+    if (activeRequest?.status) {
+      initialRequestStatus = activeRequest.status.toLowerCase() as "pending" | "accepted";
+    }
+  }
+
+  return (
+    <TuitionDetailsView
+      detailsPromise={loadTuition(id)}
+      initialRequestStatus={initialRequestStatus}
+    />
+  );
 }
