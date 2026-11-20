@@ -18,7 +18,7 @@ export function TutorPaymentPage() {
             <CreditCard size={15} /> Tutor workspace
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#203b31] sm:text-4xl">
-            Plans &amp; billing
+            Plans &amp; payment
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-6 text-[#77827b]">
             Choose a plan that fits your tutoring journey and grow your reach
@@ -77,7 +77,7 @@ export function TutorPaymentPage() {
           </div>
           <div className="relative mt-7 flex items-end gap-2">
             <span className="text-5xl font-semibold tracking-tight">$15</span>
-            <span className="pb-1.5 text-sm text-white/60">/ month</span>
+            <span className="pb-1.5 text-sm text-white/60">one-time payment</span>
           </div>
           <ul className="relative mt-7 grid gap-3 text-sm text-white/85 sm:grid-cols-2">
             <PlanFeature pro>Unlimited tuition posts</PlanFeature>
@@ -86,13 +86,27 @@ export function TutorPaymentPage() {
             <PlanFeature pro>More room to grow</PlanFeature>
           </ul>
           <div className="relative mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <button
-              type="button"
-              disabled
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#d9f36a] px-5 text-sm font-bold text-[#203b31] opacity-70"
-            >
-              Upgrade to Pro <ArrowUpRight size={16} />
-            </button>
+
+            <form action="/api/checkout_sessions" method="POST">
+              <section>
+
+                <button
+                  type="submit"
+                  role="link"
+
+                  className="inline-flex h-11 items-center cursor-pointer justify-center gap-2 rounded-full bg-[#d9f36a] px-5 text-sm font-bold text-[#203b31] opacity-70"
+                >
+                  Upgrade to Pro <ArrowUpRight size={16} />
+                </button>
+              </section>
+            </form>
+
+            {/* <section>
+                <button type="submit" role="link">
+                  Checkout
+                </button>
+              </section> */}
+
             <span className="text-xs text-white/50">Checkout will be available soon</span>
           </div>
           <div className="relative mt-6 flex items-center gap-2 border-t border-white/10 pt-4 text-xs text-white/60">
@@ -111,7 +125,7 @@ export function TutorPaymentPage() {
           <div>
             <h2 className="text-lg font-semibold text-[#203b31]">Secure payments powered by Stripe</h2>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-[#77827b]">
-              Your plan and billing details will appear here after checkout is
+              Your plan and payment details will appear here after checkout is
               connected. Payments are designed to be processed securely.
             </p>
           </div>

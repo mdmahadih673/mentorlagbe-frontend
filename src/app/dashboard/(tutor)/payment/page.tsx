@@ -7,13 +7,25 @@ import { TutorPaymentPage } from "../components/tutor-payment-page";
 
 export const instant = false;
 
-export default async function TutorPaymentRoute() {
+export default async function TutorPaymentRoute({ searchParams }: { searchParams: Promise<{ canceled?: string }> }) {
+
+  const { canceled } = await searchParams
+
+  if (canceled) {
+    console.log(
+      'Order canceled -- continue to shop around and check out when you\'re ready.'
+    )
+  }
+
+
+
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
     redirect(`/sign-in?callbackURL=${encodeURIComponent("/dashboard/payment")}`);
   }
 
   if (getAccountRole(session.user) !== "tutor") {
+
     return (
       <section className="rounded-3xl border border-[#e6e9e1] bg-white p-8 text-center">
         <CreditCard className="mx-auto text-[#78934c]" size={28} />
