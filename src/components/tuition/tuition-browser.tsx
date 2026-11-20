@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useMemo } from "react";
+import { use, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -17,7 +17,7 @@ import {
 import { Navbar } from "@/components/layout/navbar";
 import { TuitionCard } from "@/components/sections/tuition-card";
 import { Input } from "@/components/ui/input";
-import type { TuitionFormValues } from "@/lib/types/tuition";
+import { searchTuitions, type TuitionSearchParams, type TuitionSearchResult } from "@/lib/api/tuition";
 
 const subjects = [
   "Mathematics",
@@ -54,35 +54,64 @@ function FilterCheckbox({
   );
 }
 
-function matchesClassLevel(actual: string, filter: string) {
-  const normalized = actual.toLowerCase();
-  if (filter === "HSC" || filter === "Admission")
-    return normalized.includes(filter.toLowerCase());
-  const grade = Number(normalized.match(/class\s*(\d+)/)?.[1]);
-  return filter === "Class 6–8"
-    ? grade >= 6 && grade <= 8
-    : grade >= 9 && grade <= 10;
-}
-
 export function TuitionBrowser({
   tuitionsPromise,
 }: {
-  tuitionsPromise: Promise<{ data: TuitionFormValues[]; error: string }>;
+  tuitionsPromise: Promise<{ data: TuitionSearchResult | null; error: string }>;
 }) {
-  const { data: tuitions, error } = use(tuitionsPromise);
+  const initialResult = use(tuitionsPromise);
+  const [tuitions, setTuitions] = useState(initialResult.data?.data ?? []);
+  const [total, setTotal] = useState(initialResult.data?.total ?? 0);
+  const [pageCount, setPageCount] = useState(initialResult.data?.totalPages ?? 1);
+  const [currentPage, setCurrentPage] = useState(initialResult.data?.page ?? 1);
+  const [error, setError] = useState(initialResult.error);
+  const [isLoading, setIsLoading] = useState(false);
+  const requestId = useRef(0);
   const searchParams = useSearchParams();
   const search = searchParams.get("q") || "";
   const location = searchParams.get("location") || "";
   const selectedSubjects = searchParams.getAll("subject");
   const selectedClasses = searchParams.getAll("class");
   const selectedModes = searchParams.getAll("mode");
-  const minFee = searchParams.get("minFee") || "";
-  const maxFee = searchParams.get("maxFee") || "";
   const sortParam = searchParams.get("sort");
   const sortOrder: SortOrder =
     sortParam === "fee-low" || sortParam === "fee-high" ? sortParam : "newest";
-  const requestedPage = Number(searchParams.get("page") || 1);
-  const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+
+  async function fetchListings(params: URLSearchParams) {
+    const currentRequest = ++requestId.current;
+    const filters: TuitionSearchParams = {
+      q: params.get("q") || undefined,
+      location: params.get("location") || undefined,
+      subject: params.getAll("subject"),
+      mode: params.getAll("mode"),
+      class: params.getAll("class"),
+      sort: ["fee-low", "fee-high"].includes(params.get("sort") || "")
+        ? (params.get("sort") as SortOrder)
+        : "newest",
+      page: Number(params.get("page")) || 1,
+      pageSize: PAGE_SIZE,
+    };
+
+    setIsLoading(true);
+    setError("");
+    try {
+      const result = await searchTuitions(filters);
+      if (currentRequest !== requestId.current) return;
+      setTuitions(result.data);
+      setTotal(result.total);
+      setPageCount(Math.max(1, result.totalPages));
+      setCurrentPage(result.page);
+    } catch (reason) {
+      if (currentRequest !== requestId.current) return;
+      setError(reason instanceof Error ? reason.message : "Could not load tuition listings.");
+      setTuitions([]);
+      setTotal(0);
+      setPageCount(1);
+      setCurrentPage(1);
+    } finally {
+      if (currentRequest === requestId.current) setIsLoading(false);
+    }
+  }
 
   function updateQuery(
     key: string,
@@ -104,6 +133,7 @@ export function TuitionBrowser({
       "",
       query ? `${window.location.pathname}?${query}` : window.location.pathname,
     );
+    void fetchListings(params);
   }
 
   const locations = useMemo(
@@ -119,74 +149,6 @@ export function TuitionBrowser({
     [tuitions],
   );
 
-  const visibleTuitions = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    const filtered = tuitions.filter((tuition) => {
-      const searchText = [
-        tuition.title,
-        tuition.subject,
-        tuition.classLevel,
-        tuition.tutorName,
-        tuition.teacherId,
-      ]
-        .join(" ")
-        .toLowerCase();
-      const fee = Number(tuition.monthlyFee) || 0;
-      const subjectMatches =
-        !selectedSubjects.length || selectedSubjects.includes(tuition.subject);
-      const classMatches =
-        !selectedClasses.length ||
-        selectedClasses.some((level) =>
-          matchesClassLevel(tuition.classLevel, level),
-        );
-      const modeMatches =
-        !selectedModes.length || selectedModes.includes(tuition.mode);
-      const locationMatches =
-        !location ||
-        (location === "Online"
-          ? tuition.mode === "Online"
-          : tuition.mode === "Offline" &&
-            tuition.location.toLowerCase().includes(location.toLowerCase()));
-      return (
-        (!query || searchText.includes(query)) &&
-        subjectMatches &&
-        classMatches &&
-        modeMatches &&
-        locationMatches &&
-        (!minFee || fee >= Number(minFee)) &&
-        (!maxFee || fee <= Number(maxFee))
-      );
-    });
-    if (sortOrder === "fee-low")
-      return filtered.sort(
-        (a, b) => Number(a.monthlyFee) - Number(b.monthlyFee),
-      );
-    if (sortOrder === "fee-high")
-      return filtered.sort(
-        (a, b) => Number(b.monthlyFee) - Number(a.monthlyFee),
-      );
-    return filtered.sort(
-      (a, b) =>
-        new Date(b.createdAt || 0).getTime() -
-        new Date(a.createdAt || 0).getTime(),
-    );
-  }, [
-    tuitions,
-    search,
-    selectedSubjects,
-    selectedClasses,
-    selectedModes,
-    location,
-    minFee,
-    maxFee,
-    sortOrder,
-  ]);
-  const pageCount = Math.max(1, Math.ceil(visibleTuitions.length / PAGE_SIZE));
-  const currentPage = Math.min(page, pageCount);
-  const pageTuitions = visibleTuitions.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
   const pageNumbers = Array.from(
     new Set([1, currentPage - 1, currentPage, currentPage + 1, pageCount]),
   )
@@ -207,7 +169,9 @@ export function TuitionBrowser({
   }
 
   function resetFilters() {
+    const params = new URLSearchParams();
     window.history.replaceState(null, "", window.location.pathname);
+    void fetchListings(params);
   }
 
   return (
@@ -236,7 +200,7 @@ export function TuitionBrowser({
             </div>
             <p className="text-sm text-[#77827b]">
               <strong className="text-[#203b31]">
-                {visibleTuitions.length}
+                {total}
               </strong>{" "}
               tuition listings
             </p>
@@ -348,43 +312,6 @@ export function TuitionBrowser({
               />
             ))}
           </fieldset>
-          <fieldset className="pt-5">
-            <legend className="mb-4 text-sm font-semibold text-[#354a40]">
-              Monthly budget
-            </legend>
-            <div className="grid grid-cols-2 gap-2">
-              <label className="rounded-xl border border-[#e1e6de] px-3 py-2">
-                <span className="block text-[10px] uppercase tracking-wide text-[#9aa39c]">
-                  Min fee
-                </span>
-                <Input
-                  type="number"
-                  min="0"
-                  value={minFee}
-                  onChange={(event) => {
-                    updateQuery("minFee", event.target.value, true);
-                  }}
-                  placeholder="৳ 0"
-                  className="mt-1 h-8 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
-                />
-              </label>
-              <label className="rounded-xl border border-[#e1e6de] px-3 py-2">
-                <span className="block text-[10px] uppercase tracking-wide text-[#9aa39c]">
-                  Max fee
-                </span>
-                <Input
-                  type="number"
-                  min="0"
-                  value={maxFee}
-                  onChange={(event) => {
-                    updateQuery("maxFee", event.target.value, true);
-                  }}
-                  placeholder="৳ 10,000"
-                  className="mt-1 h-8 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
-                />
-              </label>
-            </div>
-          </fieldset>
         </aside>
 
         <div>
@@ -396,7 +323,7 @@ export function TuitionBrowser({
               <p className="mt-1 text-sm text-[#89928b]">
                 {error
                   ? "Listings unavailable"
-                  : `${visibleTuitions.length} of ${tuitions.length} listings`}
+                  : `${total} tuition listings`}
               </p>
             </div>
             <label className="flex items-center gap-2 self-start rounded-xl border border-[#e3e7df] bg-white px-3 text-xs text-[#89928b]">
@@ -416,7 +343,12 @@ export function TuitionBrowser({
               </select>
             </label>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {isLoading && (
+            <p className="mb-3 text-sm text-[#89928b]" role="status">
+              Updating tuition listings...
+            </p>
+          )}
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3" aria-busy={isLoading}>
             {error ? (
               <div
                 className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700 sm:col-span-2 xl:col-span-3"
@@ -424,8 +356,8 @@ export function TuitionBrowser({
               >
                 {error} Make sure the backend is running and refresh the page.
               </div>
-            ) : visibleTuitions.length ? (
-              pageTuitions.map((tuition, index) => (
+            ) : tuitions.length ? (
+              tuitions.map((tuition, index) => (
                 <TuitionCard
                   key={
                     tuition._id ||
@@ -452,7 +384,7 @@ export function TuitionBrowser({
               </div>
             )}
           </div>
-          {!error && visibleTuitions.length > PAGE_SIZE && (
+          {!error && total > PAGE_SIZE && (
             <nav
               aria-label="Tuition listings pages"
               className="mt-8 flex flex-wrap items-center justify-center gap-2"

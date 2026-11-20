@@ -1,16 +1,15 @@
 import { Suspense } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { TuitionBrowser } from "@/components/tuition/tuition-browser";
-import { getAllTuitions } from "@/lib/api/tuition";
-import type { TuitionFormValues } from "@/lib/types/tuition";
+import { searchTuitions, type TuitionSearchParams, type TuitionSearchResult } from "@/lib/api/tuition";
 
-type TuitionResult = { data: TuitionFormValues[]; error: string };
+type TuitionResult = { data: TuitionSearchResult | null; error: string };
 
-function loadTuitions(): Promise<TuitionResult> {
-  return getAllTuitions().then(
+function loadTuitions(filters: TuitionSearchParams): Promise<TuitionResult> {
+  return searchTuitions({ pageSize: 6, ...filters }).then(
     (data) => ({ data, error: "" }),
     (reason: unknown) => ({
-      data: [],
+      data: null,
       error:
         reason instanceof Error
           ? reason.message
@@ -38,10 +37,48 @@ function TuitionListingsLoading() {
   );
 }
 
-export default function TuitionsPage() {
+function getInitialFilters(
+  params: Record<string, string | string[] | undefined>,
+): TuitionSearchParams {
+  const values = (key: string) => {
+    const value = params[key];
+    return (Array.isArray(value) ? value : value ? [value] : []).flatMap((item) => item.split(",")).filter(Boolean);
+  };
+  const sort = values("sort")[0];
+
+  return {
+    q: values("q")[0],
+    location: values("location")[0],
+    subject: values("subject"),
+    mode: values("mode"),
+    class: values("class"),
+    sort: sort === "fee-low" || sort === "fee-high" ? sort : "newest",
+    page: Number(values("page")[0]) || 1,
+  };
+}
+
+async function TuitionsContent({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const filters = getInitialFilters(await searchParams);
+
   return (
     <Suspense fallback={<TuitionListingsLoading />}>
-      <TuitionBrowser tuitionsPromise={loadTuitions()} />
+      <TuitionBrowser tuitionsPromise={loadTuitions(filters)} />
+    </Suspense>
+  );
+}
+
+export default function TuitionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  return (
+    <Suspense fallback={<TuitionListingsLoading />}>
+      <TuitionsContent searchParams={searchParams} />
     </Suspense>
   );
 }
