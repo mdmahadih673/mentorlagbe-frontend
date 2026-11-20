@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { ArrowUpRight, BookOpenCheck, Search, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  BookOpenCheck,
+  Search,
+  Trash2,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +32,7 @@ const filters: { label: string; value: ListingFilter }[] = [
 ];
 
 const statusOptions: AdminTuitionStatus[] = ["pending", "approved", "rejected"];
+const PAGE_SIZE = 6;
 
 function getListingId(tuition: TuitionFormValues) {
   return tuition._id || tuition.id || tuition.tuitionId;
@@ -51,6 +59,23 @@ function statusStyle(status: string) {
   return "bg-[#f3f4f1] text-[#77827b]";
 }
 
+function getPageItems(pageCount: number, currentPage: number) {
+  const visiblePages =
+    pageCount <= 5
+      ? Array.from({ length: pageCount }, (_, index) => index + 1)
+      : [...new Set([1, currentPage - 1, currentPage, currentPage + 1, pageCount])]
+          .filter((pageNumber) => pageNumber >= 1 && pageNumber <= pageCount)
+          .sort((a, b) => a - b);
+
+  return visiblePages.flatMap((pageNumber, index) => {
+    const previousPage = visiblePages[index - 1];
+    return [
+      ...(previousPage && pageNumber - previousPage > 1 ? ["ellipsis" as const] : []),
+      pageNumber,
+    ];
+  });
+}
+
 export function AdminTuitionsTable({
   tuitions,
 }: {
@@ -59,6 +84,7 @@ export function AdminTuitionsTable({
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<ListingFilter>("all");
+  const [page, setPage] = useState(1);
   const [statusDrafts, setStatusDrafts] = useState<
     Record<string, AdminTuitionStatus>
   >({});
@@ -147,6 +173,13 @@ export function AdminTuitionsTable({
     });
   }, [query, statusFilter, tuitions]);
 
+  const pageCount = Math.max(1, Math.ceil(filteredTuitions.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const visibleTuitions = filteredTuitions.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
   return (
     <section className="overflow-hidden rounded-3xl border border-[#e6e9e1] bg-white">
       <div className="flex flex-col justify-between gap-4 border-b border-[#edf0e9] p-5 sm:flex-row sm:items-center sm:px-6">
@@ -163,7 +196,10 @@ export function AdminTuitionsTable({
               type="search"
               aria-label="Search tuition posts"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setPage(1);
+              }}
               placeholder="Search title, tutor, subject"
               className="h-8 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
             />
@@ -174,9 +210,10 @@ export function AdminTuitionsTable({
           <select
             id="tuition-status-filter"
             value={statusFilter}
-            onChange={(event) =>
-              setStatusFilter(event.target.value as ListingFilter)
-            }
+            onChange={(event) => {
+              setStatusFilter(event.target.value as ListingFilter);
+              setPage(1);
+            }}
             className="h-10 rounded-xl border border-[#e1e6de] bg-white px-3 text-sm text-[#526159] outline-none focus:border-[#91aa78] focus:ring-2 focus:ring-[#91aa78]/15"
           >
             {filters.map((filter) => (
@@ -213,7 +250,7 @@ export function AdminTuitionsTable({
               </tr>
             </thead>
             <tbody className="divide-y divide-[#edf0e9]">
-              {filteredTuitions.map((tuition, index) => {
+              {visibleTuitions.map((tuition, index) => {
                 const id = getListingId(tuition);
                 const status = getListingStatus(tuition);
                 const approvalStatus = getApprovalStatus(tuition);
@@ -310,6 +347,62 @@ export function AdminTuitionsTable({
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {filteredTuitions.length > PAGE_SIZE && (
+        <div className="flex flex-col gap-3 border-t border-[#edf0e9] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <p className="text-xs text-[#89928b]">
+            Showing {(currentPage - 1) * PAGE_SIZE + 1}–
+            {Math.min(currentPage * PAGE_SIZE, filteredTuitions.length)} of{" "}
+            {filteredTuitions.length} listings
+          </p>
+          <nav aria-label="Tuition table pages" className="flex items-center gap-2">
+            <button
+              type="button"
+              aria-label="Previous page"
+              disabled={currentPage === 1}
+              onClick={() => setPage((value) => Math.max(1, value - 1))}
+              className="flex size-10 items-center justify-center rounded-xl border border-[#e2e7df] bg-white text-[#526159] transition hover:bg-[#f5f7f1] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ArrowLeft size={16} />
+            </button>
+            {getPageItems(pageCount, currentPage).map((pageItem, index) =>
+              pageItem === "ellipsis" ? (
+                <span
+                  key={`ellipsis-${index}`}
+                  className="flex size-10 items-center justify-center text-sm text-[#89928b]"
+                  aria-hidden="true"
+                >
+                  …
+                </span>
+              ) : (
+                <button
+                  key={pageItem}
+                  type="button"
+                  aria-label={`Page ${pageItem}`}
+                  aria-current={currentPage === pageItem ? "page" : undefined}
+                  onClick={() => setPage(pageItem)}
+                  className={`flex size-10 items-center justify-center rounded-xl border text-sm font-medium transition ${
+                    currentPage === pageItem
+                      ? "border-[#1d3b31] bg-[#1d3b31] text-white"
+                      : "border-[#e2e7df] bg-white text-[#526159] hover:bg-[#f5f7f1]"
+                  }`}
+                >
+                  {pageItem}
+                </button>
+              ),
+            )}
+            <button
+              type="button"
+              aria-label="Next page"
+              disabled={currentPage === pageCount}
+              onClick={() => setPage((value) => Math.min(pageCount, value + 1))}
+              className="flex size-10 items-center justify-center rounded-xl border border-[#e2e7df] bg-white text-[#526159] transition hover:bg-[#f5f7f1] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ArrowRight size={16} />
+            </button>
+          </nav>
         </div>
       )}
     </section>
