@@ -49,3 +49,60 @@ export async function setAppUserRole(
   return result.matchedCount > 0;
 }
 
+export async function saveTutorProPayment(payment: {
+  userId: string;
+  stripeSessionId: string;
+  transactionId: string;
+  amount: number;
+  currency: string;
+  paidAt: Date;
+}) {
+  if (!ObjectId.isValid(payment.userId)) return false;
+
+  await client.connect();
+  const userId = new ObjectId(payment.userId);
+  const user = await db.collection("user").findOne(
+    { _id: userId, role: "tutor" },
+    { projection: { name: 1, email: 1 } },
+  );
+  if (!user) return false;
+
+  await db.collection("payments").updateOne(
+    { stripeSessionId: payment.stripeSessionId },
+    {
+      $setOnInsert: {
+        userEmail: user.email || "",
+        userName: user.name || "Tutor",
+        userRole: "tutor",
+        planName: "Pro Tutor",
+        amount: payment.amount,
+        currency: payment.currency.toUpperCase(),
+        transactionId: payment.transactionId,
+        stripeSessionId: payment.stripeSessionId,
+        paymentStatus: "paid",
+        paidAt: payment.paidAt,
+      },
+    },
+    { upsert: true },
+  );
+
+  await db.collection("user").updateOne(
+    { _id: userId, role: "tutor" },
+    { $set: { plan: "pro", updatedAt: payment.paidAt } },
+  );
+
+  return true;
+}
+
+export async function isTutorPro(userId: string) {
+  if (!ObjectId.isValid(userId)) return false;
+
+  await client.connect();
+  const user = await db.collection("user").findOne(
+    { _id: new ObjectId(userId), role: "tutor" },
+    { projection: { plan: 1 } },
+  );
+
+  return user?.plan === "pro";
+}
+

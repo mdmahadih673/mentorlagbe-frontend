@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { CreditCard } from "lucide-react";
-import { auth } from "@/lib/auth";
+import { auth, isTutorPro } from "@/lib/auth";
 import { getAccountRole } from "@/lib/user-role";
 import { TutorPaymentPage } from "../components/tutor-payment-page";
 
@@ -39,5 +39,7 @@ export default async function TutorPaymentRoute({ searchParams }: { searchParams
     );
   }
 
-  return <TutorPaymentPage />;
+  const isPro = await isTutorPro(session.user.id);
+
+  return <TutorPaymentPage isPro={isPro} />;
 }

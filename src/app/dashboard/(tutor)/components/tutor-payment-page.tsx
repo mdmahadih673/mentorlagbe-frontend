@@ -4,12 +4,44 @@ import {
   BookOpenCheck,
   Check,
   CreditCard,
+  ArrowRight,
   Infinity as InfinityIcon,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import Link from "next/link";
 
-export function TutorPaymentPage() {
+export function TutorPaymentPage({ isPro = false }: { isPro?: boolean }) {
+  if (isPro) {
+    return (
+      <div className="mx-auto max-w-3xl">
+        <section className="overflow-hidden rounded-3xl bg-[#1d3b31] p-8 text-white sm:p-10">
+          <span className="inline-flex items-center gap-2 rounded-full bg-[#d9f36a] px-3 py-1 text-xs font-bold uppercase tracking-wide text-[#203b31]">
+            <BadgeCheck size={15} /> Pro plan active
+          </span>
+          <h1 className="mt-5 text-3xl font-semibold sm:text-4xl">You’re on the Pro plan</h1>
+          <p className="mt-3 max-w-xl text-sm leading-6 text-white/70">
+            Your one-time payment is complete. You can post unlimited tuition listings and manage all your student requests.
+          </p>
+          <ul className="mt-7 grid gap-3 text-sm text-white/85 sm:grid-cols-2">
+            <PlanFeature pro>Unlimited tuition posts</PlanFeature>
+            <PlanFeature pro>Verified tutor badge</PlanFeature>
+            <PlanFeature pro>Manage all applicants</PlanFeature>
+            <PlanFeature pro>One-time payment completed</PlanFeature>
+          </ul>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/dashboard/post-tuition" className="inline-flex h-11 items-center gap-2 rounded-full bg-[#d9f36a] px-5 text-sm font-bold text-[#203b31]">
+              Post a tuition <ArrowRight size={16} />
+            </Link>
+            <Link href="/dashboard/my-tuitions" className="inline-flex h-11 items-center rounded-full border border-white/20 px-5 text-sm font-semibold text-white">
+              View my tuitions
+            </Link>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-6xl space-y-7">
       <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
@@ -107,7 +139,7 @@ export function TutorPaymentPage() {
                 </button>
               </section> */}
 
-            <span className="text-xs text-white/50">Checkout will be available soon</span>
+            <span className="text-xs text-white/50">One-time secure payment with Stripe</span>
           </div>
           <div className="relative mt-6 flex items-center gap-2 border-t border-white/10 pt-4 text-xs text-white/60">
             <ShieldCheck size={14} className="text-[#d9f36a]" />
