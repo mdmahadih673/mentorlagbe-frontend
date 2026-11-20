@@ -1,6 +1,38 @@
 import { API_BASE_URL } from "@/lib/api/config";
 import type { TuitionApplication } from "@/lib/types/tuition";
 
+export type StudentApplicationCounts = {
+  plan: "free" | "pro";
+  totalApplications: number;
+  pendingApplications: number;
+  acceptedApplications: number;
+  rejectedApplications: number;
+};
+
+export async function getStudentApplicationCounts(
+  studentId: string,
+): Promise<StudentApplicationCounts> {
+  const response = await fetch(
+    `${API_BASE_URL}/student/application-count/${encodeURIComponent(studentId)}`,
+    { cache: "no-store" },
+  );
+  const result = (await response.json().catch(() => null)) as
+    | ({ success?: boolean; message?: string } & Partial<StudentApplicationCounts>)
+    | null;
+
+  if (!response.ok || !result?.success) {
+    throw new Error(result?.message || "Failed to fetch your application counts.");
+  }
+
+  return {
+    plan: result.plan === "pro" ? "pro" : "free",
+    totalApplications: result.totalApplications ?? 0,
+    pendingApplications: result.pendingApplications ?? 0,
+    acceptedApplications: result.acceptedApplications ?? 0,
+    rejectedApplications: result.rejectedApplications ?? 0,
+  };
+}
+
 export async function getStudentApplications(
   studentId: string,
 ): Promise<TuitionApplication[]> {
