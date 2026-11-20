@@ -274,9 +274,6 @@ export function AdminUsersTable({
           </table>
         </div>
       )}
-      <p className="border-t border-[#edf0e9] px-5 py-3 text-xs text-[#89928b] sm:px-6">
-        Role selection is a UI preview only; changes are not saved yet.
-      </p>
     </section>
   );
 }

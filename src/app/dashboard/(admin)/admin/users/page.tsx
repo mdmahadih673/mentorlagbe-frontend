@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { ShieldCheck, UserRound, UsersRound } from "lucide-react";
 import { AdminUsersTable } from "../../components/admin-users-table";
+import { AdminCreateUserForm } from "../../components/admin-create-user-form";
 import { auth } from "@/lib/auth";
 import { getUsers } from "@/lib/api/admin/users";
 import { getAccountRole } from "@/lib/user-role";
@@ -67,6 +68,8 @@ export default async function AdminUsersPage() {
           tint="bg-[#f3eaf5] text-[#92709a]"
         />
       </section>
+
+      <AdminCreateUserForm />
 
       {users === null ? (
         <div

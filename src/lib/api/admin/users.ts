@@ -39,6 +39,29 @@ export async function getUsers(): Promise<AdminUser[]> {
 
 export const getAllUsers = getUsers;
 
+export async function createAdminUser(input: {
+  name: string;
+  email: string;
+  password: string;
+  role: AccountRole;
+}) {
+  const response = await fetch("/api/admin/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  const result = (await response.json().catch(() => null)) as {
+    success?: boolean;
+    message?: string;
+  } | null;
+
+  if (!response.ok || !result?.success) {
+    throw new Error(result?.message || "Could not create this user.");
+  }
+
+  return result;
+}
+
 export async function getUserRoleUpdate(userId: string, role: AccountRole) {
   const response = await fetch(
     `${API_BASE_URL}/users/${encodeURIComponent(userId)}/role`,

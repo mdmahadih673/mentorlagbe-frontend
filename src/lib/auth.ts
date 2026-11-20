@@ -36,7 +36,7 @@ export const auth = betterAuth({
 
 export async function setAppUserRole(
   userId: string,
-  role: "student" | "tutor",
+  role: "student" | "tutor" | "admin",
 ) {
   if (!ObjectId.isValid(userId)) return false;
   const id = new ObjectId(userId);
