@@ -11,8 +11,20 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-export function TutorPaymentPage({ isPro = false }: { isPro?: boolean }) {
-  if (isPro) {
+export function TutorPaymentPage({ plan = "free" }: { plan?: "free" | "pro" | "unknown" }) {
+  if (plan === "unknown") {
+    return (
+      <div className="mx-auto max-w-3xl rounded-3xl border border-[#e3e8dd] bg-white p-8 text-center">
+        <CreditCard className="mx-auto text-[#78934c]" size={28} />
+        <h1 className="mt-4 text-2xl font-semibold text-[#203b31]">Could not load your plan</h1>
+        <p className="mt-2 text-sm leading-6 text-[#77827b]">
+          Please make sure the backend is running, then refresh this page. If you already paid, don’t pay again.
+        </p>
+      </div>
+    );
+  }
+
+  if (plan === "pro") {
     return (
       <div className="mx-auto max-w-3xl">
         <section className="overflow-hidden rounded-3xl bg-[#1d3b31] p-8 text-white sm:p-10">

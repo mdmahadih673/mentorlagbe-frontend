@@ -9,8 +9,8 @@ import {
   CircleHelp,
 } from "lucide-react";
 
-import { auth, saveTutorProPayment } from "@/lib/auth";
-import { stripe } from "@/lib/stripe";
+import { auth } from "@/lib/auth";
+import { verifyTutorCheckout } from "@/lib/api/payment-api/payments";
 import { getAccountRole } from "@/lib/user-role";
 
 export const instant = false;
@@ -32,42 +32,12 @@ export default async function TutorPaymentSuccessPage({
 
   const { session_id: sessionId } = await searchParams;
   let paymentConfirmed = false;
-  let customerEmail = userSession.user.email;
+  const customerEmail = userSession.user.email;
 
   if (sessionId) {
     try {
-      const checkout = await stripe.checkout.sessions.retrieve(sessionId, {
-        expand: ["payment_intent"],
-      });
-      customerEmail = checkout.customer_details?.email || customerEmail;
-
-      const belongsToCurrentTutor =
-        checkout.client_reference_id === userSession.user.id &&
-        checkout.metadata?.userId === userSession.user.id &&
-        checkout.metadata?.userRole === "tutor";
-      const paymentIntent = checkout.payment_intent;
-      const transactionId =
-        typeof paymentIntent === "string"
-          ? paymentIntent
-          : paymentIntent && "id" in paymentIntent
-            ? paymentIntent.id
-            : checkout.id;
-
-      if (
-        belongsToCurrentTutor &&
-        checkout.status === "complete" &&
-        checkout.mode === "payment" &&
-        checkout.payment_status === "paid"
-      ) {
-        paymentConfirmed = await saveTutorProPayment({
-          userId: userSession.user.id,
-          stripeSessionId: checkout.id,
-          transactionId,
-          amount: (checkout.amount_total || 0) / 100,
-          currency: checkout.currency || "usd",
-          paidAt: new Date(checkout.created * 1000),
-        });
-      }
+      await verifyTutorCheckout(sessionId, userSession.user.id);
+      paymentConfirmed = true;
     } catch {
       paymentConfirmed = false;
     }

@@ -49,60 +49,36 @@ export async function setAppUserRole(
   return result.matchedCount > 0;
 }
 
-export async function saveTutorProPayment(payment: {
-  userId: string;
-  stripeSessionId: string;
-  transactionId: string;
-  amount: number;
-  currency: string;
-  paidAt: Date;
-}) {
-  if (!ObjectId.isValid(payment.userId)) return false;
+export async function isTutorPro(userId: string) {
+  if (!ObjectId.isValid(userId)) return false;
 
   await client.connect();
-  const userId = new ObjectId(payment.userId);
+  const id = new ObjectId(userId);
   const user = await db.collection("user").findOne(
-    { _id: userId, role: "tutor" },
-    { projection: { name: 1, email: 1 } },
+    { _id: id, role: "tutor" },
+    { projection: { plan: 1, email: 1 } },
   );
   if (!user) return false;
+  if (user.plan === "pro") return true;
 
-  await db.collection("payments").updateOne(
-    { stripeSessionId: payment.stripeSessionId },
-    {
-      $setOnInsert: {
-        userEmail: user.email || "",
-        userName: user.name || "Tutor",
-        userRole: "tutor",
-        planName: "Pro Tutor",
-        amount: payment.amount,
-        currency: payment.currency.toUpperCase(),
-        transactionId: payment.transactionId,
-        stripeSessionId: payment.stripeSessionId,
-        paymentStatus: "paid",
-        paidAt: payment.paidAt,
-      },
-    },
-    { upsert: true },
-  );
+  const paidPayment = await db.collection("payments").findOne({
+    userRole: { $regex: /^tutor$/i },
+    paymentStatus: "paid",
+    $or: [
+      { userId },
+      ...(user.email
+        ? [{ userEmail: user.email.trim() }]
+        : []),
+    ],
+  }, { collation: { locale: "en", strength: 2 } });
+  if (!paidPayment) return false;
 
   await db.collection("user").updateOne(
-    { _id: userId, role: "tutor" },
-    { $set: { plan: "pro", updatedAt: payment.paidAt } },
+    { _id: id, role: "tutor" },
+    { $set: { plan: "pro", updatedAt: paidPayment.paidAt || new Date() } },
   );
 
   return true;
 }
 
-export async function isTutorPro(userId: string) {
-  if (!ObjectId.isValid(userId)) return false;
-
-  await client.connect();
-  const user = await db.collection("user").findOne(
-    { _id: new ObjectId(userId), role: "tutor" },
-    { projection: { plan: 1 } },
-  );
-
-  return user?.plan === "pro";
-}
 

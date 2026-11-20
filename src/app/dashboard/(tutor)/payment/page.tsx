@@ -39,7 +39,7 @@ export default async function TutorPaymentRoute({ searchParams }: { searchParams
     );
   }
 
-  const isPro = await isTutorPro(session.user.id);
+  const isPro = await isTutorPro(session.user.id).catch(() => false);
 
-  return <TutorPaymentPage isPro={isPro} />;
+  return <TutorPaymentPage plan={isPro ? "pro" : "free"} />;
 }
