@@ -22,7 +22,9 @@ function loadTuition(id: string): Promise<DetailsResult> {
 function DetailsLoading() {
   return (
     <main className="min-h-screen bg-[#fbfaf7] text-[#19342c]">
-      <Navbar />
+      <Suspense fallback={<div className="h-16 border-b border-[#e6e9e1] bg-white" />}>
+        <Navbar />
+      </Suspense>
       <div className="mx-auto max-w-5xl animate-pulse px-5 py-8 sm:px-8 lg:px-10">
         <div className="h-64 rounded-3xl bg-[#e9ede5]" />
         <div className="mt-5 h-48 rounded-3xl bg-white" />

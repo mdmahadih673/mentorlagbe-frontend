@@ -39,6 +39,7 @@ const roleNavigation: Record<DashboardRole, NavigationItem[]> = {
       icon: ClipboardList,
     },
     { label: "Browse tuitions", href: "/tuitions", icon: BookOpenCheck },
+    { label: "Payment & plans", href: "/dashboard/student-payment", icon: CreditCard },
   ],
   tutor: [
     { label: "Overview", href: "/dashboard", icon: LayoutDashboard },

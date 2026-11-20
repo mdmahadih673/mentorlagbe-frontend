@@ -81,4 +81,37 @@ export async function isTutorPro(userId: string) {
   return true;
 }
 
+export async function isStudentPro(userId: string) {
+  if (!ObjectId.isValid(userId)) return false;
+
+  await client.connect();
+  const id = new ObjectId(userId);
+  const user = await db.collection("user").findOne(
+    { _id: id, role: "student" },
+    { projection: { plan: 1, email: 1 } },
+  );
+  if (!user) return false;
+  if (user.plan === "pro") return true;
+
+  const paidPayment = await db.collection("payments").findOne(
+    {
+      userRole: { $regex: /^student$/i },
+      paymentStatus: "paid",
+      $or: [
+        { userId },
+        ...(user.email ? [{ userEmail: user.email.trim() }] : []),
+      ],
+    },
+    { collation: { locale: "en", strength: 2 } },
+  );
+  if (!paidPayment) return false;
+
+  await db.collection("user").updateOne(
+    { _id: id, role: "student" },
+    { $set: { plan: "pro", updatedAt: paidPayment.paidAt || new Date() } },
+  );
+
+  return true;
+}
+
 

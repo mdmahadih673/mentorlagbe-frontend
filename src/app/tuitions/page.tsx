@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { Navbar } from "@/components/layout/navbar";
 import { TuitionBrowser } from "@/components/tuition/tuition-browser";
 import {
@@ -65,6 +66,7 @@ async function TuitionsContent({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  await connection();
   const filters = getInitialFilters(await searchParams);
 
   return (
