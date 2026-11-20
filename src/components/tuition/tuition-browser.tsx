@@ -1,7 +1,8 @@
 "use client";
 
-import { use, useMemo, useState } from "react";
+import { use, useMemo } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowDownUp,
   ArrowLeft,
@@ -69,15 +70,41 @@ export function TuitionBrowser({
   tuitionsPromise: Promise<{ data: TuitionFormValues[]; error: string }>;
 }) {
   const { data: tuitions, error } = use(tuitionsPromise);
-  const [search, setSearch] = useState("");
-  const [location, setLocation] = useState("");
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
-  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
-  const [selectedModes, setSelectedModes] = useState<string[]>([]);
-  const [minFee, setMinFee] = useState("");
-  const [maxFee, setMaxFee] = useState("");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
-  const [page, setPage] = useState(1);
+  const searchParams = useSearchParams();
+  const search = searchParams.get("q") || "";
+  const location = searchParams.get("location") || "";
+  const selectedSubjects = searchParams.getAll("subject");
+  const selectedClasses = searchParams.getAll("class");
+  const selectedModes = searchParams.getAll("mode");
+  const minFee = searchParams.get("minFee") || "";
+  const maxFee = searchParams.get("maxFee") || "";
+  const sortParam = searchParams.get("sort");
+  const sortOrder: SortOrder =
+    sortParam === "fee-low" || sortParam === "fee-high" ? sortParam : "newest";
+  const requestedPage = Number(searchParams.get("page") || 1);
+  const page = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+
+  function updateQuery(
+    key: string,
+    value: string | string[],
+    resetPage = false,
+  ) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete(key);
+    if (Array.isArray(value)) {
+      value.forEach((item) => params.append(key, item));
+    } else if (value) {
+      params.set(key, value);
+    }
+    if (resetPage) params.delete("page");
+
+    const query = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      query ? `${window.location.pathname}?${query}` : window.location.pathname,
+    );
+  }
 
   const locations = useMemo(
     () =>
@@ -167,27 +194,20 @@ export function TuitionBrowser({
     .sort((a, b) => a - b);
 
   function toggleFilter(
+    queryKey: string,
     value: string,
     values: string[],
-    update: (next: string[]) => void,
     checked: boolean,
   ) {
-    setPage(1);
-    update(
+    updateQuery(
+      queryKey,
       checked ? [...values, value] : values.filter((item) => item !== value),
+      true,
     );
   }
 
   function resetFilters() {
-    setPage(1);
-    setSearch("");
-    setLocation("");
-    setSelectedSubjects([]);
-    setSelectedClasses([]);
-    setSelectedModes([]);
-    setMinFee("");
-    setMaxFee("");
-    setSortOrder("newest");
+    window.history.replaceState(null, "", window.location.pathname);
   }
 
   return (
@@ -229,8 +249,7 @@ export function TuitionBrowser({
                 aria-label="Search tuitions"
                 value={search}
                 onChange={(event) => {
-                  setSearch(event.target.value);
-                  setPage(1);
+                  updateQuery("q", event.target.value, true);
                 }}
                 placeholder="Search by subject, title, or tutor"
                 className="h-11 border-0 bg-transparent shadow-none focus-visible:ring-0"
@@ -243,8 +262,7 @@ export function TuitionBrowser({
                 aria-label="Filter by location"
                 value={location}
                 onChange={(event) => {
-                  setLocation(event.target.value);
-                  setPage(1);
+                  updateQuery("location", event.target.value, true);
                 }}
                 className="h-11 min-w-0 flex-1 bg-transparent text-sm text-[#68766e] outline-none sm:w-40"
               >
@@ -286,9 +304,9 @@ export function TuitionBrowser({
                 checked={selectedSubjects.includes(subject)}
                 onChange={(checked) =>
                   toggleFilter(
+                      "subject",
                     subject,
                     selectedSubjects,
-                    setSelectedSubjects,
                     checked,
                   )
                 }
@@ -306,9 +324,9 @@ export function TuitionBrowser({
                 checked={selectedClasses.includes(level)}
                 onChange={(checked) =>
                   toggleFilter(
+                      "class",
                     level,
                     selectedClasses,
-                    setSelectedClasses,
                     checked,
                   )
                 }
@@ -325,7 +343,7 @@ export function TuitionBrowser({
                 label={mode}
                 checked={selectedModes.includes(mode)}
                 onChange={(checked) =>
-                  toggleFilter(mode, selectedModes, setSelectedModes, checked)
+                    toggleFilter("mode", mode, selectedModes, checked)
                 }
               />
             ))}
@@ -344,8 +362,7 @@ export function TuitionBrowser({
                   min="0"
                   value={minFee}
                   onChange={(event) => {
-                    setMinFee(event.target.value);
-                    setPage(1);
+                    updateQuery("minFee", event.target.value, true);
                   }}
                   placeholder="৳ 0"
                   className="mt-1 h-8 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
@@ -360,8 +377,7 @@ export function TuitionBrowser({
                   min="0"
                   value={maxFee}
                   onChange={(event) => {
-                    setMaxFee(event.target.value);
-                    setPage(1);
+                    updateQuery("maxFee", event.target.value, true);
                   }}
                   placeholder="৳ 10,000"
                   className="mt-1 h-8 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
@@ -390,8 +406,7 @@ export function TuitionBrowser({
                 aria-label="Sort tuition listings"
                 value={sortOrder}
                 onChange={(event) => {
-                  setSortOrder(event.target.value as SortOrder);
-                  setPage(1);
+                  updateQuery("sort", event.target.value, true);
                 }}
                 className="h-10 bg-transparent font-semibold text-[#526159] outline-none"
               >
@@ -446,7 +461,7 @@ export function TuitionBrowser({
                 type="button"
                 aria-label="Previous page"
                 disabled={currentPage === 1}
-                onClick={() => setPage(currentPage - 1)}
+                onClick={() => updateQuery("page", String(currentPage - 1))}
                 className="flex size-10 items-center justify-center rounded-xl border border-[#e3e7df] bg-white text-[#526159] transition hover:bg-[#f3f5ef] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <ChevronLeft size={18} />
@@ -462,7 +477,7 @@ export function TuitionBrowser({
                     aria-current={
                       currentPage === pageNumber ? "page" : undefined
                     }
-                    onClick={() => setPage(pageNumber)}
+                    onClick={() => updateQuery("page", String(pageNumber))}
                     className={`flex size-10 items-center justify-center rounded-xl border text-sm font-medium transition ${
                       currentPage === pageNumber
                         ? "border-[#1d3b31] bg-[#1d3b31] text-white"
@@ -477,7 +492,7 @@ export function TuitionBrowser({
                 type="button"
                 aria-label="Next page"
                 disabled={currentPage === pageCount}
-                onClick={() => setPage(currentPage + 1)}
+                onClick={() => updateQuery("page", String(currentPage + 1))}
                 className="flex size-10 items-center justify-center rounded-xl border border-[#e3e7df] bg-white text-[#526159] transition hover:bg-[#f3f5ef] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <ChevronRight size={18} />

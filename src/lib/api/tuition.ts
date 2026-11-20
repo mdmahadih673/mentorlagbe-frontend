@@ -9,6 +9,50 @@ type CreateTuitionResponse = {
   result?: unknown;
 };
 
+export type TuitionSearchParams = {
+  q?: string;
+  subject?: string[];
+  mode?: string[];
+  class?: string[];
+  location?: string;
+  sort?: "newest" | "fee-low" | "fee-high";
+  page?: number;
+  pageSize?: number;
+};
+
+export type TuitionSearchResult = {
+  success: boolean;
+  data: TuitionFormValues[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
+export async function searchTuitions(filters: TuitionSearchParams = {},): Promise<TuitionSearchResult> {
+  const params = new URLSearchParams();
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (Array.isArray(value)) value.forEach((item) => params.append(key, item));
+    else if (value !== undefined && value !== "") params.set(key, String(value));
+  });
+
+  const query = params.toString();
+  const response = await fetch(
+    `${API_BASE_URL}/tuitions/search${query ? `?${query}` : ""}`,
+    { cache: "no-store" },
+  );
+  const result = (await response.json().catch(() => null)) as
+    | (TuitionSearchResult & { message?: string })
+    | null;
+
+  if (!response.ok || !result?.success) {
+    throw new Error(result?.message || "Could not search tuition listings.");
+  }
+
+  return result;
+}
+
 export async function createTuition(tuitionData: TuitionFormValues) {
   const response = await fetch(`${API_BASE_URL}/tuition`, {
     method: "POST",
