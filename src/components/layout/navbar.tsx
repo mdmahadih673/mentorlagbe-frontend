@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowUpRight, BookOpenCheck, ChevronDown, LogOut } from "lucide-react";
 
@@ -20,6 +20,7 @@ const navigation = [
 
 export function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session, isPending } = useSession();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const user = session?.user;
@@ -58,7 +59,7 @@ export function Navbar() {
   }
 
   return (
-    <header className="relative z-10 border-b border-[#e8e8df]">
+    <header className="sticky top-0 z-50 border-b border-[#e8e8df] bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-10">
         <Link
           href="/"
@@ -77,18 +78,25 @@ export function Navbar() {
           className="hidden items-center gap-7 md:flex"
           aria-label="Main navigation"
         >
-          {navigation.map((item, index) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={cn(
-                "text-sm font-medium transition-colors hover:text-[#315b45]",
-                index === 0 ? "text-[#19342c]" : "text-[#69756d]",
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navigation.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "text-sm font-medium transition-colors hover:text-[#315b45]",
+                  isActive ? "text-[#19342c]" : "text-[#69756d]",
+                )}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
