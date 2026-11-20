@@ -17,7 +17,11 @@ import {
 import { Navbar } from "@/components/layout/navbar";
 import { TuitionCard } from "@/components/sections/tuition-card";
 import { Input } from "@/components/ui/input";
-import { searchTuitions, type TuitionSearchParams, type TuitionSearchResult } from "@/lib/api/tuition";
+import {
+  searchTuitions,
+  type TuitionSearchParams,
+  type TuitionSearchResult,
+} from "@/lib/api/tuition";
 
 const subjects = [
   "Mathematics",

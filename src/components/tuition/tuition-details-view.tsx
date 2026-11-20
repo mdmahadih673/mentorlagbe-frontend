@@ -16,7 +16,7 @@ import {
 import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
-import { createTuitionApplication } from "@/lib/api/Application";
+import { createTuitionApplication } from "@/lib/api/student/applications";
 import { useSession } from "@/lib/auth-client";
 import { getAccountRole } from "@/lib/user-role";
 import type { TuitionFormValues } from "@/lib/types/tuition";

@@ -1,0 +1,61 @@
+import { API_BASE_URL } from "@/lib/api/config";
+import type { TuitionApplication, TuitionApplicationStatus } from "@/lib/types/tuition";
+
+export async function getTutorApplications(
+  teacherId: string,
+): Promise<TuitionApplication[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/tutor/applications/${encodeURIComponent(teacherId)}`,
+    { cache: "no-store" },
+  );
+  const result = (await response.json().catch(() => null)) as unknown;
+
+  if (!response.ok) throw new Error("Failed to fetch student requests.");
+  if (!Array.isArray(result)) {
+    throw new Error("The tutor applications API returned an unexpected response.");
+  }
+
+  return result as TuitionApplication[];
+}
+
+async function sendApplicationRequest(
+  url: string,
+  method: "PATCH" | "DELETE",
+  teacherId: string,
+  status?: TuitionApplicationStatus,
+) {
+  const response = await fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ teacherId, ...(status ? { status } : {}) }),
+  });
+  const result = (await response.json().catch(() => null)) as {
+    success?: boolean;
+    message?: string;
+  } | null;
+
+  if (!response.ok || !result?.success) {
+    throw new Error(result?.message || "Could not update this request.");
+  }
+}
+
+export function updateTutorApplicationStatus(
+  applicationId: string,
+  teacherId: string,
+  status: TuitionApplicationStatus,
+) {
+  return sendApplicationRequest(
+    `${API_BASE_URL}/tutor/applications/${encodeURIComponent(applicationId)}/status`,
+    "PATCH",
+    teacherId,
+    status,
+  );
+}
+
+export function deleteTutorApplication(applicationId: string, teacherId: string) {
+  return sendApplicationRequest(
+    `${API_BASE_URL}/tutor/applications/${encodeURIComponent(applicationId)}`,
+    "DELETE",
+    teacherId,
+  );
+}

@@ -1,8 +1,11 @@
 import { Suspense } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { TuitionBrowser } from "@/components/tuition/tuition-browser";
-import { searchTuitions, type TuitionSearchParams, type TuitionSearchResult } from "@/lib/api/tuition";
-
+import {
+  searchTuitions,
+  type TuitionSearchParams,
+  type TuitionSearchResult,
+} from "@/lib/api/tuition";
 type TuitionResult = { data: TuitionSearchResult | null; error: string };
 
 function loadTuitions(filters: TuitionSearchParams): Promise<TuitionResult> {
