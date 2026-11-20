@@ -53,6 +53,7 @@ const roleNavigation: Record<DashboardRole, NavigationItem[]> = {
       icon: FilePlus2,
     },
     { label: "Applicants", href: "/dashboard/applicants", icon: UsersRound },
+    { label: "Payment & plans", href: "/dashboard/payment", icon: CreditCard },
   ],
   admin: [
     { label: "Overview", href: "/dashboard", icon: LayoutDashboard },

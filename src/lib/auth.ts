@@ -48,3 +48,4 @@ export async function setAppUserRole(
     );
   return result.matchedCount > 0;
 }
+
