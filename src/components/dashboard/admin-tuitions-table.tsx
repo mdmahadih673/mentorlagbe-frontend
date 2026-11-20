@@ -51,18 +51,6 @@ function statusStyle(status: string) {
   return "bg-[#f3f4f1] text-[#77827b]";
 }
 
-function formatDate(value?: string) {
-  if (!value) return "—";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime())
-    ? "—"
-    : new Intl.DateTimeFormat("en-BD", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      }).format(date);
-}
-
 export function AdminTuitionsTable({
   tuitions,
 }: {
@@ -214,14 +202,12 @@ export function AdminTuitionsTable({
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1040px] border-collapse text-left">
+          <table className="w-full min-w-[850px] border-collapse text-left">
             <thead className="bg-[#f7f8f4] text-[11px] uppercase tracking-[.12em] text-[#78847c]">
               <tr>
                 <th className="px-5 py-3.5 font-semibold sm:px-6">Tuition</th>
                 <th className="px-5 py-3.5 font-semibold">Tutor</th>
-                <th className="px-5 py-3.5 font-semibold">Mode</th>
                 <th className="px-5 py-3.5 font-semibold">Monthly fee</th>
-                <th className="px-5 py-3.5 font-semibold">Posted</th>
                 <th className="px-5 py-3.5 font-semibold">Status</th>
                 <th className="px-5 py-3.5 font-semibold">Actions</th>
               </tr>
@@ -259,23 +245,10 @@ export function AdminTuitionsTable({
                         ID: {tuition.teacherId || "—"}
                       </p>
                     </td>
-                    <td className="px-5 py-4 text-xs">
-                      <p className="font-medium text-[#354a40]">
-                        {tuition.mode}
-                      </p>
-                      <p className="mt-1 text-[#89928b]">
-                        {tuition.mode === "Online"
-                          ? "Online"
-                          : tuition.location || "Location not set"}
-                      </p>
-                    </td>
                     <td className="whitespace-nowrap px-5 py-4 font-semibold text-[#354a40]">
                       {tuition.monthlyFee === "" || tuition.monthlyFee == null
                         ? "—"
                         : `৳ ${new Intl.NumberFormat("en-BD").format(Number(tuition.monthlyFee))}`}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-xs text-[#68766e]">
-                      {formatDate(tuition.createdAt)}
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
