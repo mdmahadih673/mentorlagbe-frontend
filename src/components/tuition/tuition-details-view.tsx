@@ -158,11 +158,17 @@ export function TuitionDetailsView({
               style={
                 tuition.bannerUrl
                   ? {
-                      backgroundImage: `linear-gradient(90deg,rgba(20,45,34,.72),rgba(20,45,34,.12)),url("${tuition.bannerUrl}")`,
+                      backgroundImage: `url("${tuition.bannerUrl}")`,
                     }
                   : undefined
               }
             >
+              {tuition.bannerUrl && (
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 bg-[#19342c]/50"
+                />
+              )}
               {!tuition.bannerUrl && (
                 <div className="absolute -right-10 -top-20 size-72 rounded-full border-[35px] border-white/30" />
               )}

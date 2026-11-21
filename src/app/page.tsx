@@ -21,14 +21,14 @@ export default function Home() {
 
 function FeaturedTuitionsLoading() {
   return (
-    <section className="bg-[#f5f6f1] px-5 py-16 sm:px-8 sm:py-20 lg:px-10">
+    <section className="bg-[#f3f5ef] px-5 py-16 sm:px-8 sm:py-20 lg:px-10">
       <div className="mx-auto max-w-7xl">
         <div className="h-16 w-80 animate-pulse rounded-xl bg-[#e6e9e1]" />
         <div className="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 3 }, (_, index) => (
+          {Array.from({ length: 6 }, (_, index) => (
             <div
               key={index}
-              className="h-80 animate-pulse rounded-3xl bg-white"
+              className="h-96 animate-pulse rounded-2xl border border-[#e2e7de] bg-white"
             />
           ))}
         </div>

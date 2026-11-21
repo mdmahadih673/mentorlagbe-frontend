@@ -179,9 +179,9 @@ export function TuitionBrowser({
   }
 
   return (
-    <main className="min-h-screen bg-[#fbfaf7] text-[#19342c]">
+    <main className="min-h-screen bg-[#f3f5ef] text-[#19342c]">
       <Navbar />
-      <section className="border-b border-[#e8e9e1] bg-white">
+      <section className="border-b border-[#e1e6dc] bg-[#fbfaf7]">
         <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14 lg:px-10">
           <Link
             href="/"
@@ -191,13 +191,13 @@ export function TuitionBrowser({
           </Link>
           <div className="mt-5 flex flex-wrap items-end justify-between gap-5">
             <div>
-              <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-[#78934c]">
+              <p className="inline-flex items-center gap-2 text-sm font-semibold text-[#648147]">
                 <BookOpenCheck size={15} /> Find your learning match
               </p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-[-.05em] sm:text-5xl">
+              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
                 Find a tutor
               </h1>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-[#77827b] sm:text-base">
+              <p className="mt-3 max-w-xl text-sm leading-6 text-[#77827b] text-pretty sm:text-base">
                 Browse real tuition listings and find a class that fits your
                 goals.
               </p>
@@ -209,7 +209,7 @@ export function TuitionBrowser({
               tuition listings
             </p>
           </div>
-          <div className="mt-8 flex flex-col gap-3 rounded-2xl border border-[#e6e9e1] bg-[#fbfaf7] p-3 sm:flex-row sm:items-center sm:p-2.5">
+          <div className="mt-8 flex flex-col gap-3 rounded-2xl border border-[#e2e7de] bg-white p-3 sm:flex-row sm:items-center sm:p-2.5">
             <div className="flex min-w-0 flex-1 items-center gap-3 px-2 sm:px-3">
               <Search size={19} className="shrink-0 text-[#78934c]" />
               <Input
@@ -248,7 +248,7 @@ export function TuitionBrowser({
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-7 px-5 py-8 sm:px-8 lg:grid-cols-[245px_1fr] lg:px-10 lg:py-10">
-        <aside className="h-fit rounded-3xl border border-[#e6e9e1] bg-white p-5 sm:p-6">
+        <aside className="h-fit rounded-2xl border border-[#e2e7de] bg-white p-5 sm:p-6">
           <div className="flex items-center justify-between border-b border-[#edf0e9] pb-4">
             <h2 className="flex items-center gap-2 font-semibold text-[#203b31]">
               <SlidersHorizontal size={17} /> Filters
@@ -322,7 +322,7 @@ export function TuitionBrowser({
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-semibold tracking-tight text-[#203b31]">
-                All tuition listings
+                Tuition listings
               </h2>
               <p className="mt-1 text-sm text-[#89928b]">
                 {error
@@ -370,7 +370,6 @@ export function TuitionBrowser({
                     `${tuition.teacherId}-${(currentPage - 1) * PAGE_SIZE + index}`
                   }
                   tuition={tuition}
-                  index={index}
                 />
               ))
             ) : (

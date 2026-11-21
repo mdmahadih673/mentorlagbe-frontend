@@ -124,7 +124,7 @@ export default async function DashboardPage() {
   } else if (role === "admin") {
     eyebrow = "Platform overview";
     description =
-      "Review platform activity and keep the MentorLagbe community moving forward.";
+      "Review listings, monitor student requests, and track platform payments.";
     action = { label: "Review tuition posts", href: "/dashboard/tuitions" };
     nextStep = "Review tuition posts and keep listings relevant and helpful.";
     recommendation = "Review tuition posts";
@@ -267,33 +267,64 @@ export default async function DashboardPage() {
         </Link>
       </section>
 
+      {role === "admin" && (
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[.16em] text-[#78934c]">
+              Platform metrics
+            </p>
+            <h2 className="mt-1 text-xl font-semibold tracking-tight text-[#203b31]">
+              At a glance
+            </h2>
+          </div>
+          <p className="text-xs text-[#89928b]">
+            Users, listings, requests, and successful payments
+          </p>
+        </div>
+      )}
+
       <section
-        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        className={`grid gap-4 sm:grid-cols-2 ${role === "admin" ? "xl:grid-cols-3" : "xl:grid-cols-4"}`}
         aria-label="Dashboard statistics"
       >
         {stats.map((stat) => {
           const Icon = stat.icon;
+          const isRevenue = role === "admin" && stat.label === "Total revenue";
           return (
             <article
               key={stat.label}
-              className="rounded-3xl border border-[#e6e9e1] bg-white p-5 sm:p-6"
+              className={`group relative overflow-hidden rounded-3xl border p-5 transition-colors sm:p-6 ${
+                isRevenue
+                  ? "border-[#1d3b31] bg-[#1d3b31] text-white"
+                  : "border-[#e6e9e1] bg-white text-[#203b31] hover:border-[#cbd7c5]"
+              }`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-[#77827b]">
+                  <p
+                    className={`text-sm font-medium ${isRevenue ? "text-white/70" : "text-[#77827b]"}`}
+                  >
                     {stat.label}
                   </p>
-                  <p className="mt-3 text-3xl font-semibold tracking-[-.05em] text-[#203b31]">
+                  <p
+                    className={`mt-3 text-3xl font-semibold tracking-[-.05em] ${isRevenue ? "text-white" : "text-[#203b31]"}`}
+                  >
                     {stat.value}
                   </p>
                 </div>
                 <span
-                  className={`flex size-11 items-center justify-center rounded-2xl ${stat.tint}`}
+                  className={`flex size-11 items-center justify-center rounded-2xl ${
+                    isRevenue ? "bg-[#d9f36a] text-[#1d3b31]" : stat.tint
+                  }`}
                 >
                   <Icon size={19} />
                 </span>
               </div>
-              <p className="mt-3 text-xs text-[#9aa39c]">{stat.note}</p>
+              <p
+                className={`mt-3 text-xs ${isRevenue ? "text-white/55" : "text-[#9aa39c]"}`}
+              >
+                {stat.note}
+              </p>
             </article>
           );
         })}

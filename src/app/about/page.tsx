@@ -36,20 +36,18 @@ export default function AboutPage() {
     <main className="min-h-screen bg-[#fbfaf7] text-[#19342c]">
       <Navbar />
 
-      <section className="relative overflow-hidden bg-[#1d3b31] text-white">
-        <div className="pointer-events-none absolute -right-28 -top-40 size-[460px] rounded-full border border-white/10" />
-        <div className="pointer-events-none absolute -bottom-52 -left-20 size-[440px] rounded-full bg-[#78934b]/20 blur-3xl" />
-        <div className="relative mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10 lg:py-24">
-          <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-[#d9f36a]">
+      <section className="bg-[#eaf0dc] text-[#19342c]">
+        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10 lg:py-24">
+          <p className="inline-flex items-center gap-2 text-sm font-semibold text-[#648147]">
             <BookOpenCheck size={15} /> About MentorLagbe
           </p>
-          <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-tight tracking-[-.05em] sm:text-5xl lg:text-6xl">
+          <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-balance sm:text-5xl lg:text-6xl">
             A better connection between{" "}
-            <span className="font-serif italic text-[#d9f36a]">
+            <span className="text-[#648147]">
               students and tutors.
             </span>
           </h1>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-white/70 sm:text-lg">
+          <p className="mt-5 max-w-2xl text-base leading-7 text-[#526159] text-pretty sm:text-lg">
             MentorLagbe helps students discover tuition opportunities and gives
             tutors a simple way to share their teaching offers and manage
             incoming requests.
@@ -57,13 +55,13 @@ export default function AboutPage() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/tuitions"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#d9f36a] px-5 text-sm font-bold text-[#203b31] transition hover:bg-[#e6fb94]"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#1d3b31] px-5 text-sm font-semibold text-white transition-colors duration-300 hover:bg-[#315b45] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#648147]"
             >
               Find a tutor <ArrowRight size={16} />
             </Link>
             <Link
               href="/sign-up"
-              className="inline-flex h-11 items-center justify-center rounded-full border border-white/25 px-5 text-sm font-semibold text-white transition hover:bg-white/10"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#cad7bd] bg-white/70 px-5 text-sm font-semibold text-[#284239] transition-colors duration-300 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#648147]"
             >
               Join as a tutor
             </Link>
@@ -106,22 +104,22 @@ export default function AboutPage() {
               A clear process for both sides.
             </h2>
           </div>
-          <div className="mt-9 grid gap-4 md:grid-cols-3">
+          <div className="mt-9 grid items-start gap-4 md:grid-cols-2">
             {values.map(({ icon: Icon, title, description }, index) => (
               <article
                 key={title}
-                className="rounded-3xl border border-[#e6e9e1] bg-[#fbfaf7] p-6 sm:p-7"
+                className={`rounded-2xl border border-[#e6e9e1] bg-[#fbfaf7] p-6 sm:p-7 ${index === values.length - 1 ? "md:col-span-2 md:grid md:grid-cols-[auto_1fr] md:items-center md:gap-x-6" : ""}`}
               >
                 <span className="flex size-11 items-center justify-center rounded-2xl bg-[#eaf0dc] text-[#648147]">
                   <Icon size={20} />
                 </span>
-                <p className="mt-6 text-xs font-bold uppercase tracking-[.14em] text-[#92a17e]">
+                <p className={`mt-6 text-xs font-semibold text-[#92a17e] ${index === values.length - 1 ? "md:mt-0" : ""}`}>
                   0{index + 1}
                 </p>
-                <h3 className="mt-2 text-lg font-semibold text-[#203b31]">
+                <h3 className={`mt-2 text-lg font-semibold text-[#203b31] ${index === values.length - 1 ? "md:col-start-2" : ""}`}>
                   {title}
                 </h3>
-                <p className="mt-2 text-sm leading-6 text-[#77827b]">
+                <p className={`mt-2 text-sm leading-6 text-[#77827b] ${index === values.length - 1 ? "md:col-start-2" : ""}`}>
                   {description}
                 </p>
               </article>

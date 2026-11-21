@@ -15,8 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MentorLagbe | Find the right tutor for you",
-  description: "Discover trusted tutors for every subject, goal, and learning style.",
+  title: "MentorLagbe | Find a tutor for your next lesson",
+  description:
+    "Browse tuition listings by subject, class level, learning mode, and location. Find a tutor on MentorLagbe.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

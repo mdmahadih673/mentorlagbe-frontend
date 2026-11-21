@@ -98,11 +98,10 @@ export default function SignInPage() {
         <aside className="relative hidden overflow-hidden bg-[#1d3b31] p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
           <div className="absolute -right-32 -top-32 size-[480px] rounded-full border border-white/10" />
           <div className="absolute -right-12 -top-12 size-[320px] rounded-full border border-white/10" />
-          <div className="absolute -bottom-40 -left-20 size-[420px] rounded-full bg-[#78934b]/20 blur-3xl" />
           <div className="relative flex items-center gap-2 text-sm font-medium text-white/70"><GraduationCap size={19} /> A better way to learn</div>
           <div className="relative max-w-lg">
             <span className="mb-7 flex size-14 items-center justify-center rounded-2xl bg-[#d9f36a] text-[#203b31]"><Sparkles size={25} /></span>
-            <h2 className="text-4xl font-semibold leading-tight tracking-[-.04em] xl:text-5xl">Small steps. Strong foundations. <span className="font-serif italic text-[#d9f36a]">Big futures.</span></h2>
+            <h2 className="text-4xl font-semibold leading-tight tracking-tight xl:text-5xl">Small steps. Strong foundations. <span className="text-[#d9f36a]">Big futures.</span></h2>
             <p className="mt-5 max-w-md text-base leading-7 text-white/65">Find a mentor who understands your goals and helps you build confidence one lesson at a time.</p>
           </div>
           <p className="relative text-xs text-white/45">© 2026 MentorLagbe · Learn with confidence</p>

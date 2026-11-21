@@ -384,7 +384,6 @@ export default function SignUpPage() {
         <aside className="relative hidden overflow-hidden bg-[#1d3b31] p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
           <div className="absolute -right-32 -top-32 size-[480px] rounded-full border border-white/10" />
           <div className="absolute -right-12 -top-12 size-[320px] rounded-full border border-white/10" />
-          <div className="absolute -bottom-40 -left-20 size-[420px] rounded-full bg-[#78934b]/20 blur-3xl" />
           <div className="relative flex items-center gap-2 text-sm font-medium text-white/70">
             <GraduationCap size={19} /> A better way to learn
           </div>
@@ -394,7 +393,7 @@ export default function SignUpPage() {
             </span>
             <h2 className="text-4xl font-semibold leading-tight tracking-[-.04em] xl:text-5xl">
               Make room for{" "}
-              <span className="font-serif italic text-[#d9f36a]">
+              <span className="text-[#d9f36a]">
                 what’s possible.
               </span>
             </h2>

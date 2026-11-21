@@ -1,90 +1,76 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Sparkles } from "lucide-react";
-
+import { ArrowRight, ArrowUpRight, BookOpenCheck, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const subjects = ["Mathematics", "English", "Physics", "Chemistry"];
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-[#fbfaf7] text-[#19342c]">
-      <div className="pointer-events-none absolute -left-40 top-24 size-96 rounded-full bg-[#e9efcf] opacity-70 blur-3xl" />
-
-      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.05fr_.95fr] lg:px-10 lg:py-24">
-        <div className="relative z-10 max-w-2xl">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#dfe4d2] bg-white/80 px-3.5 py-2 text-xs font-semibold text-[#456450] shadow-sm sm:text-sm">
-            <Sparkles size={15} className="text-[#8cae36]" />
-            Better learning starts with the right guide
-          </div>
-          <h1 className="text-5xl font-semibold leading-[1.07] tracking-[-0.055em] sm:text-6xl lg:text-[4.4rem]">
-            Find the tutor who helps you{" "}
-            <span className="font-serif font-medium italic text-[#739346]">move forward.</span>
-          </h1>
-          <p className="mt-6 max-w-xl text-base leading-7 text-[#69756d] sm:text-lg sm:leading-8">
-            Discover trusted tutors for every subject, goal, and learning style.
-            Your next breakthrough begins with one good match.
+    <section className="bg-[#fbfaf7] text-[#19342c]">
+      <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.05fr_.95fr] lg:px-10 lg:py-24">
+        <div className="max-w-2xl">
+          <p className="inline-flex items-center gap-2 text-sm font-semibold text-[#648147]">
+            <BookOpenCheck size={17} /> MentorLagbe
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <h1 className="mt-5 max-w-[680px] text-4xl font-semibold leading-tight tracking-tight text-balance sm:text-5xl lg:text-6xl">
+            Find the tutor who fits the way you learn
+          </h1>
+          <p className="mt-5 max-w-xl text-base leading-7 text-[#69756d] text-pretty sm:text-lg">
+            Browse tuition listings by subject, class, learning mode, and
+            location. Send a request when you find the right fit.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
             <Button
               nativeButton={false}
-              className="h-12 rounded-full bg-[#1d3b31] px-6 text-white shadow-lg shadow-[#1d3b31]/10 hover:bg-[#315b45]"
+              className="h-12 rounded-xl bg-[#1d3b31] px-5 text-base font-semibold text-white transition-colors duration-300 hover:bg-[#315b45] focus-visible:ring-2 focus-visible:ring-[#78934c] focus-visible:ring-offset-2"
               render={<Link href="/tuitions" />}
             >
-              Explore tutors <ArrowRight />
+              Find a tutor <ArrowRight size={17} />
             </Button>
-            <Button
-              nativeButton={false}
-              variant="outline"
-              className="h-12 rounded-full border-[#d8ded4] bg-white px-6 text-[#284239] hover:bg-[#f5f7ef]"
-              render={<Link href="/sign-up" />}
+            <Link
+              href="/sign-up"
+              className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#315b45] transition-colors duration-300 hover:text-[#19342c] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#648147]"
             >
-              Become a tutor
-            </Button>
+              Teach on MentorLagbe <ArrowUpRight size={15} />
+            </Link>
           </div>
-          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-[#e6e8df] pt-6 text-sm text-[#68766e]">
-            <span className="inline-flex items-center gap-2">
-              <span className="size-2 rounded-full bg-[#91aa59]" /> Reviewed tutor profiles
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <span className="size-2 rounded-full bg-[#91aa59]" /> Learning that fits you
-            </span>
-          </div>
+          <p className="mt-8 border-t border-[#e6e9e1] pt-5 text-sm text-[#77827b]">
+            Search by subject, class level, schedule, or location.
+          </p>
         </div>
 
-        <div className="relative mx-auto w-full max-w-[540px] lg:justify-self-end">
-          <div className="absolute -right-4 top-2 h-[88%] w-[88%] rotate-[6deg] rounded-[2.5rem] bg-[#e8efcf] sm:-right-7" />
-          <div className="relative rounded-[2rem] border border-[#e7e8df] bg-white p-4 shadow-[0_30px_80px_-48px_rgba(29,59,49,.42)] sm:rounded-[2.4rem] sm:p-6">
-            <div className="flex items-center justify-between px-1 pb-5">
+        <div className="relative mx-auto w-full max-w-xl lg:justify-self-end">
+          <div className="absolute -bottom-4 -left-4 size-24 rounded-3xl bg-[#d9f36a] sm:-bottom-5 sm:-left-5" />
+          <div className="relative rounded-3xl border border-[#dfe5d9] bg-white p-5 shadow-[0_24px_64px_-44px_rgba(29,59,49,.45)] sm:p-7">
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[.16em] text-[#829087]">Your learning journey</p>
-                <p className="mt-1 text-lg font-semibold tracking-tight">A great match is closer</p>
+                <p className="text-sm font-semibold text-[#648147]">Start here</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#203b31]">
+                  What would you like to learn?
+                </h2>
               </div>
-              <span className="flex size-10 items-center justify-center rounded-full bg-[#f1f5e7] text-[#63833f]">
-                <Sparkles size={18} />
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#eaf0dc] text-[#648147]">
+                <Search size={20} />
               </span>
             </div>
-            <div className="relative overflow-hidden rounded-[1.5rem] bg-[#e9efe1] p-5 sm:p-7">
-              <div className="absolute -right-10 -top-12 size-52 rounded-full border-[28px] border-white/35" />
-              <div className="relative flex min-h-[220px] flex-col justify-between sm:min-h-[250px]">
-                <span className="w-fit rounded-full bg-white/80 px-3 py-1.5 text-xs font-semibold text-[#456450]">Personalized for you</span>
-                <div>
-                  <div className="mb-4 flex -space-x-2" aria-label="Tutor community">
-                    <span className="flex size-10 items-center justify-center rounded-full border-2 border-[#e9efe1] bg-[#d3a684] text-xs font-bold text-white">RA</span>
-                    <span className="flex size-10 items-center justify-center rounded-full border-2 border-[#e9efe1] bg-[#738e74] text-xs font-bold text-white">NS</span>
-                    <span className="flex size-10 items-center justify-center rounded-full border-2 border-[#e9efe1] bg-[#ca9565] text-xs font-bold text-white">TM</span>
-                  </div>
-                  <p className="max-w-xs text-2xl font-semibold leading-tight tracking-tight text-[#203b31] sm:text-3xl">
-                    Learn at your pace. Grow with confidence.
-                  </p>
-                </div>
-              </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              {subjects.map((subject) => (
+                <Link
+                  key={subject}
+                  href={`/tuitions?subject=${encodeURIComponent(subject)}`}
+                  className="flex min-h-14 items-center justify-between gap-2 rounded-xl border border-[#e6e9e1] bg-[#fbfaf7] px-4 text-sm font-medium text-[#354a40] transition-colors duration-300 hover:border-[#b8c99f] hover:bg-[#f3f6ed] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#648147]"
+                >
+                  {subject}
+                  <ArrowUpRight size={15} className="shrink-0 text-[#78934c]" />
+                </Link>
+              ))}
             </div>
-            <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-[#eceee7] bg-[#fcfcfa] p-4">
-              <div>
-                <p className="text-sm font-semibold">Find your next lesson</p>
-                <p className="mt-0.5 text-xs text-[#89928b]">Tutors for your goals</p>
-              </div>
-              <Link href="/tuitions" aria-label="Browse tutors" className="flex size-9 items-center justify-center rounded-full bg-[#d9f36a] text-[#243e30] transition hover:scale-105">
-                <ArrowUpRight size={18} />
-              </Link>
+
+            <div className="mt-5 flex flex-wrap items-center gap-2 text-xs text-[#77827b]">
+              <span className="font-medium text-[#526159]">Lesson mode</span>
+              <span className="rounded-lg bg-[#f3f6ed] px-3 py-2">Online</span>
+              <span className="rounded-lg bg-[#f3f6ed] px-3 py-2">In person</span>
             </div>
           </div>
         </div>

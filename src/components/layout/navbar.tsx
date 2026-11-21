@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowUpRight, BookOpenCheck, ChevronDown, LogOut } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  BookOpenCheck,
+  ChevronDown,
+  LogOut,
+  Menu,
+  X,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
@@ -23,6 +31,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { data: session, isPending } = useSession();
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const user = session?.user;
   const initials =
     user?.name
@@ -59,17 +68,17 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#e8e8df] bg-white/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8 lg:px-10">
+    <header className="sticky top-0 z-50 px-3 pt-3 sm:px-5">
+      <div className="relative z-50 mx-auto flex max-w-7xl items-center justify-between rounded-2xl border border-[#e6e9e1] bg-white/95 px-4 py-3 shadow-[0_12px_36px_-30px_rgba(29,59,49,.45)] backdrop-blur sm:px-6">
         <Link
           href="/"
           aria-label="MentorLagbe home"
-          className="flex items-center gap-2.5"
+          className="flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#648147]"
         >
           <span className="flex size-10 items-center justify-center rounded-xl bg-[#d9f36a] text-[#18372e]">
-            <BookOpenCheck size={22} strokeWidth={2.2} />
+            <BookOpenCheck size={21} strokeWidth={2} />
           </span>
-          <span className="text-xl font-extrabold tracking-tight">
+          <span className="text-lg font-semibold tracking-tight text-[#19342c] sm:text-xl">
             Mentor<span className="text-[#4b7c59]">Lagbe</span>
           </span>
         </Link>
@@ -89,7 +98,7 @@ export function Navbar() {
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-[#315b45]",
+                  "rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-300 hover:bg-[#f3f6ed] hover:text-[#315b45] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#648147]",
                   isActive ? "text-[#19342c]" : "text-[#69756d]",
                 )}
               >
@@ -100,6 +109,16 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setIsMenuOpen((open) => !open)}
+            className="flex size-10 items-center justify-center rounded-xl border border-[#e6e9e1] text-[#354a40] transition-colors duration-300 hover:bg-[#f3f6ed] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#648147] md:hidden"
+          >
+            {isMenuOpen ? <X size={19} /> : <Menu size={19} />}
+          </button>
           {isPending ? (
             <span
               aria-label="Loading account"
@@ -189,6 +208,63 @@ export function Navbar() {
             </>
           )}
         </div>
+      </div>
+
+      <div
+        id="mobile-navigation"
+        aria-hidden={!isMenuOpen}
+        inert={!isMenuOpen}
+        className={cn(
+          "fixed inset-0 z-40 bg-[#fbfaf7] px-6 pb-8 pt-24 transition-opacity duration-300 md:hidden",
+          isMenuOpen ? "visible opacity-100" : "pointer-events-none invisible opacity-0",
+        )}
+      >
+        <nav aria-label="Mobile navigation" className="flex h-full flex-col">
+          <div className="space-y-2">
+            {navigation.map((item, index) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/" && pathname.startsWith(`${item.href}/`));
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={isActive ? "page" : undefined}
+                  onClick={() => setIsMenuOpen(false)}
+                  style={{ transitionDelay: isMenuOpen ? `${index * 60}ms` : "0ms" }}
+                  className={cn(
+                    "flex min-h-14 items-center justify-between rounded-xl px-4 text-lg font-medium transition duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#648147]",
+                    isActive
+                      ? "bg-[#eaf0dc] text-[#19342c]"
+                      : "text-[#69756d] hover:bg-white hover:text-[#315b45]",
+                    isMenuOpen
+                      ? "translate-y-0 opacity-100"
+                      : "-translate-y-2 opacity-0",
+                  )}
+                >
+                  {item.label}
+                  <ArrowUpRight size={17} className="text-[#78934c]" />
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="mt-auto border-t border-[#e6e9e1] pt-5">
+            <p className="text-sm text-[#77827b]">
+              Find a tutor or share a tuition opportunity.
+            </p>
+            {!user && !isPending && (
+              <Link
+                href="/sign-in"
+                onClick={() => setIsMenuOpen(false)}
+                className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-[#315b45]"
+              >
+                Sign in <ArrowRight size={15} className="ml-2" />
+              </Link>
+            )}
+          </div>
+        </nav>
       </div>
     </header>
   );

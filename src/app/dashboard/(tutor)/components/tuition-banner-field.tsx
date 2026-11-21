@@ -105,7 +105,7 @@ export function TuitionBannerField({
         style={
           imageUrl
             ? {
-                backgroundImage: `linear-gradient(rgba(255,255,255,.15),rgba(255,255,255,.35)),url("${imageUrl}")`,
+                backgroundImage: `url("${imageUrl}")`,
               }
             : undefined
         }

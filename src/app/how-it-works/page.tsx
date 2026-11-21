@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpenCheck, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpenCheck } from "lucide-react";
 
 import { Navbar } from "@/components/layout/navbar";
 import { studentSteps, tutorSteps } from "@/lib/how-it-works";
@@ -9,18 +9,14 @@ export default function HowItWorksPage() {
     <main className="min-h-screen bg-[#fbfaf7] text-[#19342c]">
       <Navbar />
 
-      <section className="relative overflow-hidden border-b border-[#e8e8df]">
-        <div className="pointer-events-none absolute -right-28 -top-32 size-[440px] rounded-full bg-[#e9efcf] opacity-70 blur-3xl" />
-        <div className="relative mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10 lg:py-24">
+      <section className="bg-[#eaf0dc]">
+        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10 lg:py-24">
           <div className="max-w-3xl">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#dfe4d2] bg-white/80 px-3.5 py-2 text-xs font-semibold text-[#456450] shadow-sm sm:text-sm">
-              <Sparkles size={15} className="text-[#8cae36]" /> Simple steps, meaningful progress
-            </span>
-            <h1 className="mt-6 text-4xl font-semibold leading-[1.08] tracking-[-.05em] sm:text-6xl">Good learning starts with a <span className="font-serif italic font-medium text-[#739346]">good connection.</span></h1>
-            <p className="mt-6 max-w-2xl text-base leading-7 text-[#69756d] sm:text-lg sm:leading-8">MentorLagbe helps students find a tutor who fits, and gives tutors a simple way to share opportunities and meet motivated learners.</p>
+            <h1 className="text-4xl font-semibold leading-tight tracking-tight text-[#19342c] text-balance sm:text-6xl">How MentorLagbe works</h1>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-[#526159] text-pretty sm:text-lg">Students can find a tutor and track each request. Tutors can share tuition details and respond to applicants from their dashboard.</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link href="/tuitions" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#1d3b31] px-6 text-sm font-semibold text-white transition hover:bg-[#315b45]">Browse tuitions <ArrowRight size={17} /></Link>
-              <Link href="/sign-up" className="inline-flex h-12 items-center justify-center rounded-full border border-[#d8ded4] bg-white px-6 text-sm font-semibold text-[#284239] transition hover:bg-[#f5f7ef]">Join as a tutor</Link>
+              <Link href="/tuitions" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#1d3b31] px-5 text-base font-semibold text-white transition-colors duration-300 hover:bg-[#315b45] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#648147]">Browse tuitions <ArrowRight size={17} /></Link>
+              <Link href="/sign-up" className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[#cad7bd] bg-white/70 px-5 text-sm font-semibold text-[#284239] transition-colors duration-300 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#648147]">Join as a tutor</Link>
             </div>
           </div>
         </div>
@@ -61,12 +57,12 @@ export default function HowItWorksPage() {
             <h2 className="mt-3 text-3xl font-semibold tracking-[-.04em] sm:text-4xl">Share what you teach. Meet your next student.</h2>
             <p className="mt-4 text-sm leading-6 text-[#77827b]">Create a clear tuition post, then manage applications from your tutor dashboard.</p>
           </div>
-          <div className="mt-9 grid gap-4 md:grid-cols-3">
+          <div className="mt-9 grid items-start gap-4 md:grid-cols-2">
             {tutorSteps.map((step) => (
-              <article key={step.number} className="rounded-3xl border border-[#e8e9e1] bg-[#fbfaf7] p-6 sm:p-7">
+              <article key={step.number} className={`rounded-2xl border border-[#e8e9e1] bg-[#fbfaf7] p-6 sm:p-7 ${step.number === tutorSteps[tutorSteps.length - 1]?.number ? "md:col-span-2 md:grid md:grid-cols-[auto_1fr] md:items-start md:gap-x-6" : ""}`}>
                 <span className="text-sm font-bold tracking-[.12em] text-[#91a86a]">{step.number}</span>
-                <h3 className="mt-6 text-lg font-semibold tracking-tight text-[#203b31]">{step.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-[#77827b]">{step.description}</p>
+                <h3 className={`mt-6 text-lg font-semibold tracking-tight text-[#203b31] ${step.number === tutorSteps[tutorSteps.length - 1]?.number ? "md:col-start-2 md:mt-0" : ""}`}>{step.title}</h3>
+                <p className={`mt-2 text-sm leading-6 text-[#77827b] ${step.number === tutorSteps[tutorSteps.length - 1]?.number ? "md:col-start-2" : ""}`}>{step.description}</p>
               </article>
             ))}
           </div>

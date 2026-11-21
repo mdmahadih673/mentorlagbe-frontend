@@ -159,7 +159,7 @@ export default function ProfilePage() {
         className="overflow-hidden rounded-[1.8rem] border border-[#e6e9e1] bg-white"
       >
         <div className="h-28 bg-[#1d3b31] sm:h-36">
-          <div className="h-full bg-[radial-gradient(circle_at_80%_10%,rgba(217,243,106,.22),transparent_35%)]" />
+          <div className="h-full bg-[#1d3b31]" />
         </div>
 
         <div className="px-5 pb-7 sm:px-8 sm:pb-8">
