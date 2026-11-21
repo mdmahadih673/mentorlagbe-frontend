@@ -7,6 +7,8 @@ import { auth } from "@/lib/auth";
 import { getMyTuitionsServer } from "@/lib/api/tutor/server-tuitions";
 import { getAccountRole } from "@/lib/user-role";
 
+export const instant = false;
+
 export default async function MyTuitionsPage({
   searchParams,
 }: {

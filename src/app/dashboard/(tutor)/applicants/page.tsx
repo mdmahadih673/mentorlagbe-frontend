@@ -7,6 +7,8 @@ import { auth } from "@/lib/auth";
 import { getTutorApplicationsServer } from "@/lib/api/tutor/server-applications";
 import { getAccountRole } from "@/lib/user-role";
 
+export const instant = false;
+
 export default async function ApplicantsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
 
