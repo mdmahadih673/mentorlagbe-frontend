@@ -24,6 +24,8 @@ import { getMyTuitionsServer } from "@/lib/api/tutor/server-tuitions";
 import { getAllTuitions } from "@/lib/api/tuition";
 import type { TuitionApplication } from "@/lib/types/tuition";
 
+export const instant = false;
+
 type DashboardRole = "student" | "tutor" | "admin";
 type DashboardStat = {
   label: string;
