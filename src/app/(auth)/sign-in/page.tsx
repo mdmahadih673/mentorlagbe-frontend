@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { ArrowLeft, ArrowRight, BookOpenCheck, Eye, GraduationCap, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpenCheck, Eye, EyeOff, GraduationCap, ShieldCheck, Sparkles } from "lucide-react";
 
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { toast } from "@/components/ui/toast";
@@ -13,6 +13,7 @@ export default function SignInPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -75,8 +76,16 @@ export default function SignInPage() {
                 <label className="block text-sm font-semibold text-[#354a40]" htmlFor="signin-password">
                   Password
                   <span className="relative mt-2 block">
-                    <input id="signin-password" name="password" type="password" placeholder="Enter your password" autoComplete="current-password" required className="h-12 w-full rounded-xl border border-[#e0e5dc] bg-white px-4 pr-12 font-normal text-[#203b31] outline-none transition placeholder:text-[#a0aaa3] focus:border-[#91aa78] focus:ring-4 focus:ring-[#91aa78]/10" />
-                    <Eye size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#98a39b]" aria-hidden="true" />
+                    <input id="signin-password" name="password" type={showPassword ? "text" : "password"} placeholder="Enter your password" autoComplete="current-password" required className="h-12 w-full rounded-xl border border-[#e0e5dc] bg-white px-4 pr-12 font-normal text-[#203b31] outline-none transition placeholder:text-[#a0aaa3] focus:border-[#91aa78] focus:ring-4 focus:ring-[#91aa78]/10" />
+                    <button
+                      type="button"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-pressed={showPassword}
+                      onClick={() => setShowPassword((visible) => !visible)}
+                      className="absolute right-3 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center text-[#98a39b] hover:text-[#456450]"
+                    >
+                      {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                    </button>
                   </span>
                 </label>
                 <div className="flex items-center justify-between gap-3 text-sm">
