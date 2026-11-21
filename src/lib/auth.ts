@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { MongoClient, ObjectId } from "mongodb";
-import { admin } from "better-auth/plugins";
+import { admin, jwt } from "better-auth/plugins";
 
 function requiredEnv(name: string) {
   const value = process.env[name];
@@ -13,11 +13,25 @@ function requiredEnv(name: string) {
 
 const client = new MongoClient(requiredEnv("MONGODB_URL"));
 const db = client.db("mentorlagbe");
+const baseURL = requiredEnv("BETTER_AUTH_URL")
+  .split("#")[0]
+  .trim()
+  .replace(/\/$/, "");
 
 export const auth = betterAuth({
   secret: requiredEnv("BETTER_AUTH_SECRET"),
-  baseURL: requiredEnv("BETTER_AUTH_URL").split("#")[0].trim(),
+  baseURL,
   database: mongodbAdapter(db, { client }),
+  user: {
+    additionalFields: {
+      plan: {
+        type: "string",
+        required: false,
+        input: false,
+        defaultValue: "free",
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
   },
@@ -31,7 +45,15 @@ export const auth = betterAuth({
       clientSecret: requiredEnv("GITHUB_CLIENT_SECRET"),
     },
   },
-  plugins: [admin({ defaultRole: "student", adminRoles: ["admin"] })],
+  plugins: [
+    admin({ defaultRole: "student", adminRoles: ["admin"] }),
+    jwt({
+      jwt: {
+        issuer: baseURL,
+        audience: "mentorlagbe-api",
+      },
+    }),
+  ],
 });
 
 export async function setAppUserRole(

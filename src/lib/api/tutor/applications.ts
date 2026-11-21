@@ -1,22 +1,8 @@
+"use server";
+
 import { API_BASE_URL } from "@/lib/api/config";
-import type { TuitionApplication, TuitionApplicationStatus } from "@/lib/types/tuition";
-
-export async function getTutorApplications(
-  teacherId: string,
-): Promise<TuitionApplication[]> {
-  const response = await fetch(
-    `${API_BASE_URL}/tutor/applications/${encodeURIComponent(teacherId)}`,
-    { cache: "no-store" },
-  );
-  const result = (await response.json().catch(() => null)) as unknown;
-
-  if (!response.ok) throw new Error("Failed to fetch student requests.");
-  if (!Array.isArray(result)) {
-    throw new Error("The tutor applications API returned an unexpected response.");
-  }
-
-  return result as TuitionApplication[];
-}
+import { protectedMutation } from "@/lib/api/core/server";
+import type { TuitionApplicationStatus } from "@/lib/types/tuition";
 
 async function sendApplicationRequest(
   url: string,
@@ -24,11 +10,11 @@ async function sendApplicationRequest(
   teacherId: string,
   status?: TuitionApplicationStatus,
 ) {
-  const response = await fetch(url, {
+  const response = await protectedMutation(
+    url,
     method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ teacherId, ...(status ? { status } : {}) }),
-  });
+    { teacherId, ...(status ? { status } : {}) },
+  );
   const result = (await response.json().catch(() => null)) as {
     success?: boolean;
     message?: string;
@@ -39,7 +25,7 @@ async function sendApplicationRequest(
   }
 }
 
-export function updateTutorApplicationStatus(
+export async function updateTutorApplicationStatus(
   applicationId: string,
   teacherId: string,
   status: TuitionApplicationStatus,
@@ -52,7 +38,7 @@ export function updateTutorApplicationStatus(
   );
 }
 
-export function deleteTutorApplication(applicationId: string, teacherId: string) {
+export async function deleteTutorApplication(applicationId: string, teacherId: string) {
   return sendApplicationRequest(
     `${API_BASE_URL}/tutor/applications/${encodeURIComponent(applicationId)}`,
     "DELETE",

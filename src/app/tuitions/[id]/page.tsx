@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { Navbar } from "@/components/layout/navbar";
 import { TuitionDetailsView } from "@/components/tuition/tuition-details-view";
 import { auth } from "@/lib/auth";
-import { getStudentApplications } from "@/lib/api/student/applications";
+import { getStudentApplicationsServer } from "@/lib/api/student/server-applications";
 import { getTuitionById } from "@/lib/api/tuition";
 import { getAccountRole } from "@/lib/user-role";
 import type { TuitionApplicationStatus, TuitionFormValues } from "@/lib/types/tuition";
@@ -51,7 +51,7 @@ async function TuitionDetailsFromParams({params,}: {params: Promise<{ id: string
   let initialRequestStatus: Extract<TuitionApplicationStatus, "pending" | "accepted"> | null = null;
 
   if (session && getAccountRole(session.user) === "student") {
-    const applications = await getStudentApplications(session.user.id).catch(() => []);
+    const applications = await getStudentApplicationsServer(session.user.id).catch(() => []);
     const activeRequest = applications.find(
       (application) =>
         application.tuitionId === id &&

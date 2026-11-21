@@ -1,4 +1,7 @@
+"use server";
+
 import { API_BASE_URL } from "@/lib/api/config";
+import { authFetch } from "@/lib/api/core/server";
 
 export type TutorTuitionUsage = {
   count: number;
@@ -9,8 +12,8 @@ export type TutorTuitionUsage = {
 };
 
 export async function getTutorTuitionUsage(teacherId: string,): Promise<TutorTuitionUsage> {
-  const response = await fetch(`${API_BASE_URL}/tutor/tuition-count/${encodeURIComponent(teacherId)}`,
-    { cache: "no-store" },
+  const response = await authFetch(
+    `${API_BASE_URL}/tutor/tuition-count/${encodeURIComponent(teacherId)}`,
   );
   const result = (await response.json().catch(() => null)) as
     | ({ success?: boolean; message?: string } & Partial<TutorTuitionUsage>)

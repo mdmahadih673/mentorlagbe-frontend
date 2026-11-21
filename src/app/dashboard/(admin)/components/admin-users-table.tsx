@@ -6,7 +6,8 @@ import { Search, ShieldCheck, Trash2, UserRound, UsersRound } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
-import { deleteUserAccount, getUserRoleUpdate } from "@/lib/api/admin/users";
+import { getUserRoleUpdate } from "@/lib/api/admin/user-actions";
+import { deleteUserAccount } from "@/lib/api/admin/users";
 import type { AccountRole, AdminUser } from "@/lib/types/user";
 
 const roleOptions: AccountRole[] = ["student", "tutor", "admin"];

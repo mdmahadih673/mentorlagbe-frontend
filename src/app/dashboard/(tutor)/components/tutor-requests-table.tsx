@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, LoaderCircle, Trash2 } from "lucide-react";
+import { Eye, LoaderCircle, Phone, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
 import { deleteTutorApplication } from "@/lib/api/tutor/applications";
@@ -104,6 +104,14 @@ export function TutorRequestsTable({ applications, teacherId }: Props) {
                         application.studentId ||
                         "Contact details unavailable"}
                     </p>
+                    {application.studentPhone && (
+                      <a
+                        href={`tel:${application.studentPhone}`}
+                        className="mt-1 inline-flex items-center gap-1 text-xs text-[#89928b]"
+                      >
+                        <Phone size={12} /> {application.studentPhone}
+                      </a>
+                    )}
                   </td>
                   <td className="max-w-56 px-5 py-4">
                     <p className="font-semibold text-[#354a40]">
@@ -113,6 +121,14 @@ export function TutorRequestsTable({ applications, teacherId }: Props) {
                       {application.subject ||
                         `Tuition ID: ${application.tuitionId}`}
                     </p>
+                    {application.monthlyFee != null && (
+                      <p className="mt-1 text-xs text-[#89928b]">
+                        Monthly fee: ৳{" "}
+                        {new Intl.NumberFormat("en-BD").format(
+                          Number(application.monthlyFee),
+                        )}
+                      </p>
+                    )}
                   </td>
                   <td className="max-w-64 px-5 py-4">
                     <p className="line-clamp-2 text-xs leading-5 text-[#68766e]">

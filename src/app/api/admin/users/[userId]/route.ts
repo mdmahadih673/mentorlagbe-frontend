@@ -27,10 +27,19 @@ export async function DELETE(
     );
   }
 
+  const accessToken = await auth.api.getToken({ headers: await headers() });
+  if (!accessToken?.token) {
+    return NextResponse.json({ message: "Sign in required." }, { status: 401 });
+  }
+
   try {
     const response = await fetch(
       `${API_BASE_URL}/users/${encodeURIComponent(userId)}`,
-      { method: "DELETE", cache: "no-store" },
+      {
+        method: "DELETE",
+        headers: { authorization: `Bearer ${accessToken.token}` },
+        cache: "no-store",
+      },
     );
     const result = (await response.json().catch(() => null)) as {
       success?: boolean;

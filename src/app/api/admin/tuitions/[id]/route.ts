@@ -7,9 +7,9 @@ import { getAccountRole } from "@/lib/user-role";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
 
-async function isAdmin() {
+async function getAdminSession() {
   const session = await auth.api.getSession({ headers: await headers() });
-  return session && getAccountRole(session.user) === "admin";
+  return session && getAccountRole(session.user) === "admin" ? session : null;
 }
 
 async function forwardResponse(response: Response) {
@@ -24,11 +24,16 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await isAdmin())) {
+  const session = await getAdminSession();
+  if (!session) {
     return NextResponse.json({ message: "Admin access required." }, { status: 403 });
   }
 
   const { id } = await params;
+  const accessToken = await auth.api.getToken({ headers: await headers() });
+  if (!accessToken?.token) {
+    return NextResponse.json({ message: "Sign in required." }, { status: 401 });
+  }
   const body = (await request.json().catch(() => null)) as {
     status?: unknown;
   } | null;
@@ -41,7 +46,10 @@ export async function PATCH(
       `${API_BASE_URL}/admin/tuitions/${encodeURIComponent(id)}/status`,
       {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${accessToken.token}`,
+        },
         body: JSON.stringify({ status: body.status }),
         cache: "no-store",
       },
@@ -56,15 +64,24 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await isAdmin())) {
+  const session = await getAdminSession();
+  if (!session) {
     return NextResponse.json({ message: "Admin access required." }, { status: 403 });
   }
 
   const { id } = await params;
+  const accessToken = await auth.api.getToken({ headers: await headers() });
+  if (!accessToken?.token) {
+    return NextResponse.json({ message: "Sign in required." }, { status: 401 });
+  }
   try {
     const response = await fetch(
       `${API_BASE_URL}/admin/tuitions/${encodeURIComponent(id)}`,
-      { method: "DELETE", cache: "no-store" },
+      {
+        method: "DELETE",
+        headers: { authorization: `Bearer ${accessToken.token}` },
+        cache: "no-store",
+      },
     );
     return await forwardResponse(response);
   } catch {

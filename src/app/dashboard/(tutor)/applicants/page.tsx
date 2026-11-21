@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { ArrowLeft, UsersRound } from "lucide-react";
 import { TutorRequestsTable } from "../components/tutor-requests-table";
 import { auth } from "@/lib/auth";
-import { getTutorApplications } from "@/lib/api/tutor/applications";
+import { getTutorApplicationsServer } from "@/lib/api/tutor/server-applications";
 import { getAccountRole } from "@/lib/user-role";
 
 export default async function ApplicantsPage() {
@@ -36,7 +36,7 @@ export default async function ApplicantsPage() {
     );
   }
 
-  const applications = await getTutorApplications(session.user.id).catch(
+  const applications = await getTutorApplicationsServer(session.user.id).catch(
     () => null,
   );
 

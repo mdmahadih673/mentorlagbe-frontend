@@ -2,9 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, LoaderCircle, Pencil, Trash2 } from "lucide-react";
+import {
+  Eye,
+  LoaderCircle,
+  Pencil,
+  ToggleLeft,
+  ToggleRight,
+  Trash2,
+} from "lucide-react";
 import { toast } from "@/components/ui/toast";
-import { deleteTuition } from "@/lib/api/tutor/tuition";
+import { deleteTuition, setTuitionActive } from "@/lib/api/tutor/tuition";
 import type { TuitionFormValues } from "@/lib/types/tuition";
 
 export function MyTuitionPostsTable({
@@ -16,6 +23,33 @@ export function MyTuitionPostsTable({
 }) {
   const [tuitions, setTuitions] = useState(initialTuitions);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  async function handleToggleActive(id: string, isActive: boolean) {
+    setUpdatingId(id);
+    try {
+      await setTuitionActive(id, isActive);
+      setTuitions((current) =>
+        current.map((tuition) =>
+          (tuition._id || tuition.id || tuition.tuitionId) === id
+            ? { ...tuition, isActive }
+            : tuition,
+        ),
+      );
+      toast.add({
+        title: isActive ? "Tuition listing reopened" : "Tuition listing closed",
+        type: "success",
+      });
+    } catch (error) {
+      toast.add({
+        title: "Could not update listing",
+        description: error instanceof Error ? error.message : "Please try again.",
+        type: "error",
+      });
+    } finally {
+      setUpdatingId(null);
+    }
+  }
 
   async function handleDelete(id: string) {
     if (!window.confirm("Delete this tuition post? This cannot be undone."))
@@ -81,13 +115,16 @@ export function MyTuitionPostsTable({
             {tuitions.map((tuition, index) => {
               const id = tuition._id || tuition.id || tuition.tuitionId;
               const status = tuition.approvalStatus || "pending";
+              const isActive = tuition.isActive !== false;
               const statusStyle =
-                status.toLowerCase() === "approved" ||
-                status.toLowerCase() === "accepted"
-                  ? "bg-emerald-50 text-emerald-800"
-                  : status.toLowerCase() === "rejected"
-                    ? "bg-red-50 text-red-800"
-                    : "bg-amber-50 text-amber-800";
+                status.toLowerCase() === "approved" && !isActive
+                  ? "bg-slate-100 text-slate-700"
+                  : status.toLowerCase() === "approved" ||
+                      status.toLowerCase() === "accepted"
+                    ? "bg-emerald-50 text-emerald-800"
+                    : status.toLowerCase() === "rejected"
+                      ? "bg-red-50 text-red-800"
+                      : "bg-amber-50 text-amber-800";
 
               return (
                 <tr
@@ -108,12 +145,31 @@ export function MyTuitionPostsTable({
                     <span
                       className={`inline-flex rounded-full px-2 py-1 text-[10px] font-semibold capitalize sm:px-2.5 sm:text-xs ${statusStyle}`}
                     >
-                      {status}
+                      {status.toLowerCase() === "approved" && !isActive
+                        ? "Closed"
+                        : status}
                     </span>
                   </td>
                   <td className="px-2 py-3 sm:px-5 sm:py-4">
                     {id ? (
                       <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                        {status.toLowerCase() === "approved" && (
+                          <button
+                            type="button"
+                            disabled={updatingId === id}
+                            onClick={() => void handleToggleActive(id, !isActive)}
+                            className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#dfe5dc] px-2 text-[11px] font-semibold text-[#354a40] transition hover:bg-[#f7f8f4] disabled:opacity-50 sm:gap-1.5 sm:px-2.5 sm:text-xs"
+                          >
+                            {updatingId === id ? (
+                              <LoaderCircle size={13} className="animate-spin" />
+                            ) : isActive ? (
+                              <ToggleRight size={14} />
+                            ) : (
+                              <ToggleLeft size={14} />
+                            )}
+                            {isActive ? "Close" : "Reopen"}
+                          </button>
+                        )}
                         <Link
                           href={`/tuitions/${encodeURIComponent(id)}`}
                           className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#dfe5dc] px-2 text-[11px] font-semibold text-[#354a40] transition hover:bg-[#f7f8f4] sm:gap-1.5 sm:px-2.5 sm:text-xs"

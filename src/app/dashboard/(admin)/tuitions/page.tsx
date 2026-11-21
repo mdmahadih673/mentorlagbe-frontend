@@ -5,7 +5,7 @@ import { BookOpenCheck, Clock3, FileCheck2, XCircle } from "lucide-react";
 
 import { AdminTuitionsTable } from "../components/admin-tuitions-table";
 import { auth } from "@/lib/auth";
-import { getAllTuitions } from "@/lib/api/tuition";
+import { getAdminTuitions } from "@/lib/api/admin/tuitions";
 import { getAccountRole } from "@/lib/user-role";
 import type { TuitionFormValues } from "@/lib/types/tuition";
 
@@ -22,7 +22,7 @@ export default async function AdminTuitionsPage() {
 
   let tuitions: TuitionFormValues[] | null = null;
   try {
-    tuitions = await getAllTuitions();
+    tuitions = await getAdminTuitions();
   } catch {
     
   }

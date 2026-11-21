@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import {
   createTuitionApplication,
@@ -22,7 +24,10 @@ import {
 } from "@/lib/api/student/applications";
 import { useSession } from "@/lib/auth-client";
 import { getAccountRole } from "@/lib/user-role";
-import type { TuitionApplicationStatus, TuitionFormValues } from "@/lib/types/tuition";
+import type {
+  TuitionApplicationStatus,
+  TuitionFormValues,
+} from "@/lib/types/tuition";
 
 type DetailsResult = { tuition: TuitionFormValues | null; error: string };
 
@@ -31,13 +36,20 @@ export function TuitionDetailsView({
   initialRequestStatus,
 }: {
   detailsPromise: Promise<DetailsResult>;
-  initialRequestStatus: Extract<TuitionApplicationStatus, "pending" | "accepted"> | null;
+  initialRequestStatus: Extract<
+    TuitionApplicationStatus,
+    "pending" | "accepted"
+  > | null;
 }) {
   const { tuition, error } = use(detailsPromise);
   const router = useRouter();
   const { data: session, isPending } = useSession();
   const [isRequesting, setIsRequesting] = useState(false);
-  const [activeRequestStatus, setActiveRequestStatus] = useState(initialRequestStatus);
+  const [activeRequestStatus, setActiveRequestStatus] =
+    useState(initialRequestStatus);
+  const [studentPhone, setStudentPhone] = useState("");
+  const [preferredTime, setPreferredTime] = useState("");
+  const [message, setMessage] = useState("");
   const fee =
     tuition?.monthlyFee == null
       ? "Not specified"
@@ -85,6 +97,14 @@ export function TuitionDetailsView({
       });
       return;
     }
+    if (!studentPhone.trim() || !preferredTime.trim()) {
+      toast.add({
+        title: "Request details required",
+        description: "Add your phone number and preferred schedule first.",
+        type: "error",
+      });
+      return;
+    }
 
     setIsRequesting(true);
     try {
@@ -104,6 +124,9 @@ export function TuitionDetailsView({
         studentId: session.user.id,
         studentName: session.user.name || "Student",
         studentEmail: session.user.email,
+        studentPhone: studentPhone.trim(),
+        preferredTime: preferredTime.trim(),
+        message: message.trim(),
       });
       setActiveRequestStatus("pending");
       toast.add({
@@ -267,6 +290,44 @@ export function TuitionDetailsView({
                 <p className="mt-1 break-all text-xs text-[#89928b]">
                   Tutor ID: {tuition.teacherId || "Unavailable"}
                 </p>
+                <div className="mt-5 space-y-3">
+                  <label className="block space-y-1.5 text-xs font-medium text-[#526159]">
+                    Phone number <span className="text-red-600">*</span>
+                    <Input
+                      type="tel"
+                      autoComplete="tel"
+                      required
+                      value={studentPhone}
+                      onChange={(event) => setStudentPhone(event.target.value)}
+                      placeholder="Your contact number"
+                      disabled={Boolean(activeRequestStatus) || isRequesting}
+                    />
+                  </label>
+                  <label className="block space-y-1.5 text-xs font-medium text-[#526159]">
+                    Preferred schedule <span className="text-red-600">*</span>
+                    <Input
+                      required
+                      value={preferredTime}
+                      onChange={(event) => setPreferredTime(event.target.value)}
+                      placeholder="e.g. Sunday–Thursday, evenings"
+                      disabled={Boolean(activeRequestStatus) || isRequesting}
+                    />
+                  </label>
+                  <label className="block space-y-1.5 text-xs font-medium text-[#526159]">
+                    Learning note{" "}
+                    <span className="font-normal text-[#89928b]">
+                      (optional)
+                    </span>
+                    <Textarea
+                      value={message}
+                      onChange={(event) => setMessage(event.target.value)}
+                      placeholder="Share a little about what you need help with"
+                      maxLength={1000}
+                      rows={3}
+                      disabled={Boolean(activeRequestStatus) || isRequesting}
+                    />
+                  </label>
+                </div>
                 <Button
                   type="button"
                   onClick={() => void handleRequestTuition()}

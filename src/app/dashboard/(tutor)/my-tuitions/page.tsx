@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { BookOpenCheck, Plus } from "lucide-react";
 import { MyTuitionPostsTable } from "../components/my-tuition-posts-table";
 import { auth } from "@/lib/auth";
-import { getMyTuitions } from "@/lib/api/tutor/tuition";
+import { getMyTuitionsServer } from "@/lib/api/tutor/server-tuitions";
 import { getAccountRole } from "@/lib/user-role";
 
 export default async function MyTuitionsPage({
@@ -35,7 +35,7 @@ export default async function MyTuitionsPage({
     );
   }
 
-  const tuitions = await getMyTuitions(session.user.id).catch(() => null);
+  const tuitions = await getMyTuitionsServer(session.user.id).catch(() => null);
 
   return (
     <div className="space-y-7">

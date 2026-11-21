@@ -14,14 +14,13 @@ import {
 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { getAccountRole } from "@/lib/user-role";
-import { getAllUsers } from "@/lib/api/admin/users";
+import { getUsers as getAllUsers } from "@/lib/api/admin/server-users";
 import { getAdminApplicationCount } from "@/lib/api/admin/applications";
+import { getAdminTuitions } from "@/lib/api/admin/tuitions";
 import { getAdminRevenue } from "@/lib/api/admin/transactions";
-import {
-  getStudentApplicationCounts,
-} from "@/lib/api/student/applications";
-import { getTutorApplications } from "@/lib/api/tutor/applications";
-import { getMyTuitions } from "@/lib/api/tutor/tuition";
+import { getStudentApplicationCountsServer } from "@/lib/api/student/server-applications";
+import { getTutorApplicationsServer } from "@/lib/api/tutor/server-applications";
+import { getMyTuitionsServer } from "@/lib/api/tutor/server-tuitions";
 import { getAllTuitions } from "@/lib/api/tuition";
 import type { TuitionApplication } from "@/lib/types/tuition";
 
@@ -79,8 +78,8 @@ export default async function DashboardPage() {
     recommendationHref = "/dashboard/applicants";
 
     const [tuitions, applications] = await Promise.all([
-      getMyTuitions(session.user.id).catch(() => null),
-      getTutorApplications(session.user.id).catch(() => null),
+      getMyTuitionsServer(session.user.id).catch(() => null),
+      getTutorApplicationsServer(session.user.id).catch(() => null),
     ]);
     const approvedCount = tuitions?.filter(
       (tuition) =>
@@ -132,7 +131,7 @@ export default async function DashboardPage() {
 
     const [users, tuitions, totalApplications, totalRevenue] = await Promise.all([
       getAllUsers().catch(() => null),
-      getAllTuitions().catch(() => null),
+      getAdminTuitions().catch(() => null),
       getAdminApplicationCount().catch(() => undefined),
       getAdminRevenue().catch(() => undefined),
     ]);
@@ -140,9 +139,16 @@ export default async function DashboardPage() {
       {
         label: "Total users",
         value: count(users?.length),
-        note: "Students and tutors",
+        note: "All platform accounts",
         icon: UsersRound,
         tint: "bg-[#eaf0dc] text-[#648147]",
+      },
+      {
+        label: "Total tutors",
+        value: count(users?.filter((user) => user.role === "tutor").length),
+        note: "Tutor accounts",
+        icon: UsersRound,
+        tint: "bg-[#eaf0f5] text-[#66849a]",
       },
       {
         label: "Pending review",
@@ -203,7 +209,7 @@ export default async function DashboardPage() {
     ];
   } else {
     const [applicationCounts, tuitions] = await Promise.all([
-      getStudentApplicationCounts(session.user.id).catch(() => null),
+      getStudentApplicationCountsServer(session.user.id).catch(() => null),
       getAllTuitions().catch(() => null),
     ]);
     stats = [

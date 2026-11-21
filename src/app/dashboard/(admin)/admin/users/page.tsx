@@ -4,7 +4,7 @@ import { ShieldCheck, UserRound, UsersRound } from "lucide-react";
 import { AdminUsersTable } from "../../components/admin-users-table";
 import { AdminCreateUserForm } from "../../components/admin-create-user-form";
 import { auth } from "@/lib/auth";
-import { getUsers } from "@/lib/api/admin/users";
+import { getUsers } from "@/lib/api/admin/server-users";
 import { getAccountRole } from "@/lib/user-role";
 
 export const instant = false;

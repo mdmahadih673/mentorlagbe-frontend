@@ -51,11 +51,24 @@ export interface TuitionApplication {
   studentId?: string;
   studentName?: string;
   studentEmail?: string;
+  studentPhone?: string;
   tuitionTitle?: string;
   tutorName?: string;
+  tutorEmail?: string;
   subject?: string;
+  monthlyFee?: number | string;
   message?: string;
   preferredTime?: string;
   status?: TuitionApplicationStatus;
   createdAt?: string;
+}
+
+export interface StudentApplicationInput {
+  tuitionId: string;
+  studentId: string;
+  studentName: string;
+  studentEmail?: string;
+  studentPhone: string;
+  preferredTime: string;
+  message?: string;
 }

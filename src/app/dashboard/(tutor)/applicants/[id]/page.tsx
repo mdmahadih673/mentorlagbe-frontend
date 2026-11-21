@@ -8,11 +8,12 @@ import {
   GraduationCap,
   Mail,
   MessageSquareText,
+  Phone,
 } from "lucide-react";
 import { ApplicationStatusActions } from "../../components/application-status-actions";
 import { auth } from "@/lib/auth";
 import { getAccountRole } from "@/lib/user-role";
-import { getTutorApplications } from "@/lib/api/tutor/applications";
+import { getTutorApplicationsServer } from "@/lib/api/tutor/server-applications";
 
 export const instant = false;
 
@@ -30,7 +31,7 @@ export default async function ApplicantDetailsPage({
   if (getAccountRole(session.user) !== "tutor") redirect("/dashboard");
 
   const { id } = await params;
-  const applications = await getTutorApplications(session.user.id).catch(
+  const applications = await getTutorApplicationsServer(session.user.id).catch(
     () => null,
   );
   if (!applications) {
@@ -97,6 +98,20 @@ export default async function ApplicantDetailsPage({
               </p>
             </div>
           </div>
+          {application.studentPhone && (
+            <div className="flex items-start gap-3 rounded-2xl bg-[#f8f9f6] p-4">
+              <Phone size={17} className="mt-0.5 text-[#78934c]" />
+              <div className="min-w-0">
+                <p className="text-xs text-[#89928b]">Contact phone</p>
+                <a
+                  className="mt-1 block font-semibold text-[#354a40]"
+                  href={`tel:${application.studentPhone}`}
+                >
+                  {application.studentPhone}
+                </a>
+              </div>
+            </div>
+          )}
           <div className="flex items-start gap-3 rounded-2xl bg-[#f8f9f6] p-4">
             <Mail size={17} className="mt-0.5 text-[#78934c]" />
             <div className="min-w-0">
