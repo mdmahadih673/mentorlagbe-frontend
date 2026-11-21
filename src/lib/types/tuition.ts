@@ -40,6 +40,7 @@ export interface TuitionFormValues {
   createdAt?: string;
   updatedAt?: string;
   tutorName?: string;
+  tutorEmail?: string;
 }
 
 export type TuitionApplicationStatus = "pending" | "accepted" | "rejected";

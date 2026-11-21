@@ -120,7 +120,7 @@ export function TuitionCard({
               {tutor}
             </p>
             <p className="mt-0.5 truncate text-xs text-[#8a958d]">
-              Tutor ID: {tuition.teacherId || "Unavailable"}
+              Tutor email: {tuition.tutorEmail || "Unavailable"}
             </p>
           </div>
           <span className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-[#f3f6ed] px-2.5 py-2 text-xs font-medium text-[#567445]">

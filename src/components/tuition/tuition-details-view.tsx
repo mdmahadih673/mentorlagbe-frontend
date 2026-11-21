@@ -288,7 +288,7 @@ export function TuitionDetailsView({
                   {tuition.tutorName || "MentorLagbe tutor"}
                 </h2>
                 <p className="mt-1 break-all text-xs text-[#89928b]">
-                  Tutor ID: {tuition.teacherId || "Unavailable"}
+                  Tutor email: {tuition.tutorEmail || "Unavailable"}
                 </p>
                 <div className="mt-5 space-y-3">
                   <label className="block space-y-1.5 text-xs font-medium text-[#526159]">
