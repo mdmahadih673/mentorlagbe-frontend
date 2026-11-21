@@ -3,6 +3,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Hero } from "@/components/sections/hero";
 import { FeaturedTuitions } from "@/components/sections/featured-tuitions";
 import { HowItWorksPreview } from "@/components/sections/how-it-works-preview";
+import { PricingSection } from "@/components/sections/pricing-section";
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
         <FeaturedTuitions />
       </Suspense>
       <HowItWorksPreview />
+      <PricingSection />
     </main>
   );
 }

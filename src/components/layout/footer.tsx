@@ -4,6 +4,7 @@ import { ArrowUpRight, BookOpenCheck } from "lucide-react";
 const footerLinks = [
   { label: "Find a tutor", href: "/tuitions" },
   { label: "How it works", href: "/how-it-works" },
+  { label: "Pricing", href: "/pricing" },
   { label: "About MentorLagbe", href: "/about" },
 ];
 
