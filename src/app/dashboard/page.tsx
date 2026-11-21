@@ -15,6 +15,8 @@ import {
 import { auth } from "@/lib/auth";
 import { getAccountRole } from "@/lib/user-role";
 import { getAllUsers } from "@/lib/api/admin/users";
+import { getAdminApplicationCount } from "@/lib/api/admin/applications";
+import { getAdminRevenue } from "@/lib/api/admin/transactions";
 import {
   getStudentApplicationCounts,
 } from "@/lib/api/student/applications";
@@ -128,9 +130,11 @@ export default async function DashboardPage() {
     recommendation = "Review tuition posts";
     recommendationHref = "/dashboard/tuitions";
 
-    const [users, tuitions] = await Promise.all([
+    const [users, tuitions, totalApplications, totalRevenue] = await Promise.all([
       getAllUsers().catch(() => null),
       getAllTuitions().catch(() => null),
+      getAdminApplicationCount().catch(() => undefined),
+      getAdminRevenue().catch(() => undefined),
     ]);
     stats = [
       {
@@ -174,6 +178,27 @@ export default async function DashboardPage() {
         note: "Not approved",
         icon: XCircle,
         tint: "bg-[#fbeceb] text-[#a35e55]",
+      },
+      {
+        label: "Applications",
+        value: count(totalApplications),
+        note: "Student tuition requests",
+        icon: BookOpenCheck,
+        tint: "bg-[#eaf0f5] text-[#66849a]",
+      },
+      {
+        label: "Total revenue",
+        value:
+          totalRevenue === undefined
+            ? "—"
+            : new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+                maximumFractionDigits: 2,
+              }).format(totalRevenue),
+        note: "Successful payments",
+        icon: CalendarDays,
+        tint: "bg-[#f4eafa] text-[#8b65a1]",
       },
     ];
   } else {

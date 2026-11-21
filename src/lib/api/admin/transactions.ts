@@ -30,3 +30,18 @@ export function getStudentTransactions() {
 export function getTutorTransactions() {
   return getTransactions("tutors");
 }
+
+export async function getAdminRevenue(): Promise<number> {
+  const response = await fetch(`${API_BASE_URL}/admin/transactions/revenue`, {
+    cache: "no-store",
+  });
+  const result = (await response.json().catch(() => null)) as
+    | { success?: boolean; totalRevenue?: number; message?: string }
+    | null;
+
+  if (!response.ok || !result?.success) {
+    throw new Error(result?.message || "Could not load total revenue.");
+  }
+
+  return result.totalRevenue ?? 0;
+}
